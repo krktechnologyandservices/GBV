@@ -1,0 +1,55 @@
+<nb-card>
+  <nb-card-header>
+    Attendance Records
+    <div class="actions-bar" style="margin-bottom: 1rem;">
+      <button nbButton size="tiny" status="info" style="float: right;" (click)="goToSettings()">⚙ Settings</button>
+      <button nbButton size="tiny" status="warning" style="float: right;" (click)="processLOP()">Process LOP</button>
+      <button nbButton size="tiny" status="success" style="float: right;"  (click)="createManualEntry()">+ Manual Entry</button>
+      
+    </div>
+
+    <!-- <button nbButton size="tiny" status="info" style="float: right;" routerLink="/pages/attendance/settings">
+      <nb-icon icon="settings-outline"></nb-icon> Settings
+    </button> -->
+  </nb-card-header>
+
+  <nb-card-body>
+    <nb-spinner *ngIf="loading" size="small"></nb-spinner>
+
+    <table
+      *ngIf="!loading && attendanceList.length"
+      class="table table-striped table-hover"
+    >
+      <thead>
+        <tr>
+          <th>Employee ID</th>
+          <th>Date</th>
+          <th>Check In</th>
+          <th>Check Out</th>
+          <th>Attendance Type</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let session of attendanceList">
+          <td>{{ session.employeeId }}</td>
+          <td>{{ session.attendanceDate | date: 'mediumDate' }}</td>
+          <td>{{ session.checkInTime }}</td>
+          <td>{{ session.checkOutTime || '-' }}</td>
+          <td>{{ session.attendanceType }}</td>
+          <td>
+            <nb-user
+              [nbContextMenu]="menuItems"
+              [onlyPicture]="true"
+              [name]="'Options'"
+              [picture]="'assets/icons/more-icon.png'"
+              (menuClick)="onActionClick($event, session)"
+            ></nb-user>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p *ngIf="!loading && !attendanceList.length">No attendance records found.</p>
+  </nb-card-body>
+</nb-card>

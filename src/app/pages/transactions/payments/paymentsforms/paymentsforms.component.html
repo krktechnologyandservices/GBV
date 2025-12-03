@@ -1,0 +1,344 @@
+<!-- paymentsforms.component.html -->
+<nb-card class="payment-form-card">
+  <nb-card-header class="payment-form-header">
+    <div class="header-content">
+      <h4>{{ payment ? 'Edit Payment' : 'New Payment' }}</h4>
+    </div>
+  </nb-card-header>
+
+  <nb-card-body class="payment-form-body" [formGroup]="form">
+   <!-- Student Selection -->
+<div class="form-section">
+  <h5 class="section-title">Student Information</h5>
+  <div class="form-grid">
+    <div class="form-item">
+      <label class="form-label">Student</label>
+      <nb-select 
+        formControlName="studentId" 
+        placeholder="Type to search students..." 
+        fullWidth
+        (searchInput)="filterStudents($event)"
+        (closed)="clearStudentFilter()">
+        
+        <!-- Search input inside dropdown -->
+        <nb-option>
+          <div class="search-container">
+            <input 
+              #searchInput
+              type="text" 
+              class="student-search-input" 
+              placeholder="Search by name, ID, email or phone..."
+              [value]="studentSearchQuery"
+              (input)="filterStudents($event)"
+              (click)="$event.stopPropagation()">
+          </div>
+        </nb-option>
+        
+        <!-- Student options -->
+        <nb-option *ngFor="let s of filteredStudents" [value]="s.studentId">
+          <div class="student-option">
+            <div class="student-main">
+              <span class="name">{{ s.fullName }}</span>
+              <span class="id">ID: {{ s.studentId }}</span>
+            </div>
+            <div class="student-details" *ngIf="s.phone || s.email">
+              <small class="contact">
+                {{ s.phone }} {{ s.email ? '• ' + s.email : '' }}
+              </small>
+            </div>
+          </div>
+        </nb-option>
+
+        <!-- No results message -->
+        <nb-option *ngIf="filteredStudents.length === 0 && studentSearchQuery" disabled>
+          <div class="no-results">
+            <nb-icon icon="search-outline"></nb-icon>
+            No students found for "{{ studentSearchQuery }}"
+          </div>
+        </nb-option>
+      </nb-select>
+      
+      <!-- Selected student display -->
+      <div class="selected-student" *ngIf="form.get('studentId')?.value">
+        <nb-icon icon="person-outline"></nb-icon>
+        {{ getSelectedStudentName() }}
+      </div>
+    </div>
+  </div>
+</div>
+
+    <!-- Payment Details -->
+    <div class="form-section">
+      <h5 class="section-title">Payment Details</h5>
+      <div class="form-grid">
+        <div class="form-item">
+          <label class="form-label">Payment Date</label>
+          <input nbInput type="date" formControlName="paymentDate" fullWidth />
+        </div>
+        <div class="form-item">
+          <label class="form-label">Payment Type</label>
+          <nb-select formControlName="paymentType" fullWidth>
+            <nb-option value="BILL">
+              <div class="payment-option">
+                <nb-icon icon="file-text-outline"></nb-icon>
+                Bill
+              </div>
+            </nb-option>
+            <nb-option value="ADVANCE">
+              <div class="payment-option">
+                <nb-icon icon="trending-up-outline"></nb-icon>
+                Advance
+              </div>
+            </nb-option>
+            <nb-option value="OLD">
+              <div class="payment-option">
+                <nb-icon icon="clock-outline"></nb-icon>
+                Old
+              </div>
+            </nb-option>
+          </nb-select>
+        </div>
+        <div class="form-item">
+          <label class="form-label">Payment Mode</label>
+          <nb-select formControlName="paymentMode" fullWidth>
+            <nb-option value="Cash">
+              <div class="payment-option">
+                <nb-icon icon="credit-card-outline"></nb-icon>
+                Cash
+              </div>
+            </nb-option>
+            <nb-option value="Cheque">
+              <div class="payment-option">
+                <nb-icon icon="archive-outline"></nb-icon>
+                Cheque
+              </div>
+            </nb-option>
+            <nb-option value="UPI">
+              <div class="payment-option">
+                <nb-icon icon="smartphone-outline"></nb-icon>
+                UPI
+              </div>
+            </nb-option>
+          </nb-select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Amount & Remarks -->
+    <div class="form-section">
+      <h5 class="section-title">Amount & Reference</h5>
+      <div class="form-grid">
+        <div class="form-item">
+          <label class="form-label">Total Paying Amount</label>
+          <input nbInput type="number" formControlName="totalAmount" placeholder="0.00" fullWidth />
+        </div>
+        <div class="form-item">
+          <label class="form-label">Reference Number</label>
+          <input nbInput type="text" formControlName="referenceNumber" placeholder="Reference number" fullWidth />
+        </div>
+        <div class="form-item">
+          <label class="form-label">Remarks</label>
+          <input nbInput type="text" formControlName="remarks" placeholder="Additional remarks" fullWidth />
+        </div>
+      </div>
+    </div>
+
+    <!-- Pending Bills -->
+    <div class="form-section" *ngIf="form.get('paymentType')?.value === 'BILL'">
+      <nb-card class="nested-card">
+        <nb-card-header class="nested-header">
+          <div class="nested-header-content">
+            <h6>Pending Bills</h6>
+            <button nbButton size="small" status="info" (click)="loadPendingBills(form.value.studentId)">
+              <nb-icon icon="refresh-outline"></nb-icon>
+              Reload
+            </button>
+          </div>
+        </nb-card-header>
+        <nb-card-body class="nested-body">
+          <!-- Desktop Table -->
+          <div class="table-container desktop-view">
+            <table class="bills-table">
+              <thead>
+                <tr>
+                  <th>Room No</th>
+                  <th>Period</th>
+                  <th>Bill Amount</th>
+                  <th>Balance</th>
+                  <th class="adjust-column">Adjust Amount</th>
+                </tr>
+              </thead>
+              <tbody formArrayName="billAdjustments">
+                <tr *ngFor="let b of billAdjArray.controls; let i = index" [formGroupName]="i">
+                  <td>
+                    <div class="room-info">
+                      <nb-icon icon="home-outline"></nb-icon>
+                      {{ b.value.roomNo }}
+                    </div>
+                  </td>
+                  <td>{{ b.value.period }}</td>
+                  <td>
+                    <div class="amount-display">
+                      {{ b.value.billAmount | currency:'INR' }}
+                    </div>
+                  </td>
+                  <td>
+                    <div class="balance-display">
+                      {{ b.value.balance | currency:'INR' }}
+                    </div>
+                  </td>
+                  <td class="adjust-cell">
+                    <input 
+                      nbInput 
+                      type="number" 
+                      formControlName="adjustedAmount"
+                      (input)="onManualAdjustChanged()"
+                      placeholder="0.00"
+                      class="adjust-input" />
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Mobile Cards for Bills -->
+          <div class="mobile-view">
+            <div *ngFor="let b of billAdjArray.controls; let i = index" [formGroupName]="i" class="bill-card">
+              <div class="bill-header">
+                <div class="bill-title">
+                  <nb-icon icon="home-outline" status="primary"></nb-icon>
+                  <span>Room {{ b.value.roomNo }}</span>
+                </div>
+                <div class="bill-period">{{ b.value.period }}</div>
+              </div>
+              <div class="bill-details">
+                <div class="bill-item">
+                  <span class="label">Bill Amount:</span>
+                  <span class="value">{{ b.value.billAmount | currency:'INR' }}</span>
+                </div>
+                <div class="bill-item">
+                  <span class="label">Balance:</span>
+                  <span class="value">{{ b.value.balance | currency:'INR' }}</span>
+                </div>
+                <div class="bill-item full-width">
+                  <span class="label">Adjust Amount:</span>
+                  <input 
+                    nbInput 
+                    type="number" 
+                    formControlName="adjustedAmount"
+                    (input)="onManualAdjustChanged()"
+                    placeholder="0.00"
+                    class="adjust-input" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </nb-card-body>
+      </nb-card>
+    </div>
+
+    <!-- Additional Charges -->
+    <div class="form-section" *ngIf="form.get('paymentType')?.value === 'BILL'">
+      <nb-card class="nested-card">
+        <nb-card-header class="nested-header">
+          <div class="nested-header-content">
+            <h6>Additional Charges</h6>
+            <button nbButton size="small" status="success" (click)="addCharge()">
+              <nb-icon icon="plus-outline"></nb-icon>
+              Add Charge
+            </button>
+          </div>
+        </nb-card-header>
+        <nb-card-body class="nested-body">
+          <div formArrayName="additionalCharges" class="charges-container">
+            <!-- Desktop Table -->
+            <div class="table-container desktop-view" *ngIf="additionalCharges.controls.length">
+              <table class="charges-table">
+                <thead>
+                  <tr>
+                    <th>Expense Head</th>
+                    <th>Amount</th>
+                    <th>Remarks</th>
+                    <th class="actions-column">Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let ch of additionalCharges.controls; let i=index" [formGroupName]="i">
+                    <td>
+                      <nb-select formControlName="expenseHeadId" placeholder="Select head" fullWidth>
+                        <nb-option *ngFor="let head of expenseHeads" [value]="head.Id">
+                          {{ head.Name }}
+                        </nb-option>
+                      </nb-select>
+                    </td>
+                    <td>
+                      <input nbInput type="number" formControlName="amount" placeholder="0.00" fullWidth />
+                    </td>
+                    <td>
+                      <input nbInput type="text" formControlName="remarks" placeholder="Remarks" fullWidth />
+                    </td>
+                    <td class="actions-cell">
+                      <button nbButton size="tiny" status="danger" (click)="removeCharge(i)">
+                        <nb-icon icon="trash-2-outline"></nb-icon>
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Mobile Cards for Charges -->
+            <div class="mobile-view">
+              <div *ngFor="let ch of additionalCharges.controls; let i=index" [formGroupName]="i" class="charge-card">
+                <div class="charge-header">
+                  <h6>Charge {{ i + 1 }}</h6>
+                  <button nbButton size="tiny" status="danger" (click)="removeCharge(i)">
+                    <nb-icon icon="trash-2-outline"></nb-icon>
+                  </button>
+                </div>
+                <div class="charge-details">
+                  <div class="charge-item">
+                    <label>Expense Head</label>
+                    <nb-select formControlName="expenseHeadId" placeholder="Select head" fullWidth>
+                      <nb-option *ngFor="let head of expenseHeads" [value]="head.Id">
+                        {{ head.Name }}
+                      </nb-option>
+                    </nb-select>
+                  </div>
+                  <div class="charge-item">
+                    <label>Amount</label>
+                    <input nbInput type="number" formControlName="amount" placeholder="0.00" fullWidth />
+                  </div>
+                  <div class="charge-item">
+                    <label>Remarks</label>
+                    <input nbInput type="text" formControlName="remarks" placeholder="Remarks" fullWidth />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Empty State for Charges -->
+            <div *ngIf="additionalCharges.controls.length === 0" class="empty-charges">
+              <nb-icon icon="list-outline" status="basic"></nb-icon>
+              <p>No additional charges added</p>
+            </div>
+          </div>
+        </nb-card-body>
+      </nb-card>
+    </div>
+  </nb-card-body>
+
+  <!-- Footer Buttons -->
+  <nb-card-footer class="payment-form-footer">
+    <div class="footer-actions">
+      <button nbButton status="primary" (click)="save()" class="action-btn">
+        <nb-icon icon="checkmark-outline"></nb-icon>
+        {{ payment ? 'Update' : 'Save' }} Payment
+      </button>
+      <button nbButton status="danger" (click)="cancel()" class="action-btn">
+        <nb-icon icon="close-outline"></nb-icon>
+        Cancel
+      </button>
+    </div>
+  </nb-card-footer>
+</nb-card>

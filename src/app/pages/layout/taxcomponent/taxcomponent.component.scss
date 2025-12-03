@@ -1,0 +1,289 @@
+/* Main Card Layout */
+:host {
+    display: block;
+    padding: 1rem;
+  }
+  
+  nb-card {
+    margin: 0;
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e0e0e0;
+  }
+  
+  /* Header Section */
+  nb-card-header {
+    padding: 1.25rem 1.5rem;
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #e0e0e0;
+  
+    h4 {
+      margin: 0 0 1rem 0;
+      font-size: 1.375rem;
+      font-weight: 600;
+      color: #2d3748;
+    }
+  }
+  
+  /* Header Container with Actions */
+  .header-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+  
+      /* Search Container */
+      .search-container {
+        position: relative;
+        flex: 1;
+        min-width: 250px;
+  
+        .search-input {
+          width: 100%;
+          padding-right: 2.5rem;
+          border-radius: 2rem;
+        }
+  
+        .search-button {
+          position: absolute;
+          right: 0;
+          top: 0;
+          height: 100%;
+          width: 2.5rem;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: transparent;
+          border: none;
+          cursor: pointer;
+  
+          nb-icon {
+            font-size: 1.25rem;
+            color: #718096;
+          }
+        }
+      }
+  
+      /* Add Component Button */
+      button[nbButton] {
+        white-space: nowrap;
+      }
+    }
+  }
+  
+  /* Tabset Styling */
+  nb-tabset {
+    margin-top: 1rem;
+  
+    ::ng-deep ul {
+      padding: 0;
+      margin: 0;
+      border-bottom: 1px solid #e0e0e0;
+    }
+  
+    ::ng-deep .tab-link {
+      padding: 0.75rem 1rem;
+    }
+  }
+  
+  /* Form Section */
+  .form-section {
+    margin-top: 1.5rem;
+  
+    nb-card {
+      border: 1px solid #e0e0e0;
+      box-shadow: none;
+    }
+  
+    /* Form Rows */
+    .form-row {
+      margin-bottom: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+  
+      /* Checkbox with Conditional Field */
+      nb-checkbox {
+        margin-bottom: 0.5rem;
+      }
+  
+      /* Conditional Form Fields */
+      nb-form-field {
+        width: 100%;
+      }
+    }
+  
+    /* Options Grid */
+    .options-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 1.5rem;
+      margin: 2rem 0;
+    }
+  
+    /* Form Actions */
+    .form-actions {
+      margin-top: 1.5rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid #e0e0e0;
+      display: flex;
+      justify-content: flex-end;
+      gap: 1rem;
+    }
+  }
+  
+  /* List Section */
+  .list-section {
+    margin-top: 1.5rem;
+  
+    /* Component Items */
+    .component-item {
+      padding: 1rem 0;
+      border-bottom: 1px solid #e0e0e0;
+  
+      &:last-child {
+        border-bottom: none;
+      }
+  
+      .item-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+  
+        .item-content {
+          flex: 1;
+          min-width: 0; /* Prevent overflow */
+  
+          .item-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.5rem;
+  
+            h5 {
+              margin: 0;
+              font-size: 1.125rem;
+              font-weight: 500;
+              color: #2d3748;
+              white-space: nowrap;
+              overflow: hidden;
+              text-overflow: ellipsis;
+            }
+          }
+  
+          .item-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            align-items: center;
+          }
+        }
+  
+        .item-actions {
+          display: flex;
+          gap: 0.5rem;
+        }
+      }
+    }
+  
+    /* No Results State */
+    .no-results {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 3rem 1rem;
+      text-align: center;
+      color: #718096;
+  
+      nb-icon {
+        font-size: 3rem;
+        margin-bottom: 1.5rem;
+        color: #cbd5e0;
+      }
+  
+      p {
+        margin: 0 0 1.5rem;
+        font-size: 1.125rem;
+      }
+    }
+  }
+  
+  /* Badge Styling */
+  nb-badge {
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+  
+    &[status="primary"] {
+      background-color: #ebf8ff;
+      color: #3182ce;
+    }
+    &[status="success"] {
+      background-color: #f0fff4;
+      color: #38a169;
+    }
+    &[status="info"] {
+      background-color: #ebf8ff;
+      color: #3182ce;
+    }
+    &[status="warning"] {
+      background-color: #fffaf0;
+      color: #dd6b20;
+    }
+    &[status="danger"] {
+      background-color: #fff5f5;
+      color: #e53e3e;
+    }
+    &[status="basic"] {
+      background-color: #f7fafc;
+      color: #4a5568;
+    }
+  }
+  
+  /* Loading Animation */
+  .btn-pulse {
+    animation: pulse 1.5s infinite;
+  }
+  
+  @keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.7; }
+    100% { opacity: 1; }
+  }
+  
+  /* Responsive Adjustments */
+  @media (max-width: 768px) {
+    .header-container .header-actions {
+      flex-direction: column;
+      gap: 1rem;
+  
+      .search-container,
+      button[nbButton] {
+        width: 100%;
+      }
+    }
+  
+    .form-section {
+      .options-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  
+    .list-section .component-item .item-container {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 1rem;
+  
+      .item-actions {
+        align-self: flex-end;
+      }
+    }
+  }

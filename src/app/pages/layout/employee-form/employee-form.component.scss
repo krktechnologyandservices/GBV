@@ -1,0 +1,26 @@
+.responsive-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+  
+  .flex-half {
+    flex: 1 1 48%;
+    min-width: 200px;
+  }
+  
+  .flex-full {
+    flex: 1 1 100%;
+  }
+  
+  button {
+    margin-right: 0.5rem;
+  }
+  
+  @media (max-width: 600px) {
+    .flex-half {
+      flex: 1 1 100%;
+    }
+  }
+  

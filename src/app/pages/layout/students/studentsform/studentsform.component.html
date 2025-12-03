@@ -1,0 +1,229 @@
+<nb-layout>
+  <nb-layout-header fixed>
+    <div class="header-container">
+      <div class="logo-container">
+        <nb-icon icon="book-outline" class="header-logo"></nb-icon>
+        <span class="header-title">Student Management</span>
+      </div>
+      <button nbButton ghost size="small" (click)="cancel()" class="header-action">
+        <nb-icon icon="arrow-back-outline"></nb-icon>
+        Back to Students
+      </button>
+    </div>
+  </nb-layout-header>
+
+  <nb-layout-column class="layout-column">
+    <nb-card class="student-form-card">
+      <nb-card-header class="form-header">
+        <div class="header-content">
+          <div class="title-section">
+            <nb-icon [icon]="isEdit ? 'edit-outline' : 'person-add-outline'" class="title-icon"></nb-icon>
+            <h4>{{ isEdit ? 'Edit Student' : 'Add New Student' }}</h4>
+          </div>
+          <div class="header-actions">
+            <button nbButton status="basic" size="small" (click)="cancel()" class="mobile-cancel-btn">
+              <nb-icon icon="close-outline"></nb-icon>
+            </button>
+          </div>
+        </div>
+      </nb-card-header>
+      
+      <nb-card-body class="form-body">
+        <form [formGroup]="studentForm" (ngSubmit)="save()" class="student-form">
+          
+          <!-- Personal Information Section -->
+          <nb-accordion class="form-section">
+            <nb-accordion-item [expanded]="true">
+              <nb-accordion-item-header class="section-header">
+                <nb-icon icon="person-outline" class="section-icon"></nb-icon>
+                Personal Information
+                <span class="section-badge" *ngIf="studentForm.get('fullName')?.value || studentForm.get('email')?.value">
+                  <nb-icon icon="checkmark-circle-2-outline"></nb-icon>
+                </span>
+              </nb-accordion-item-header>
+              <nb-accordion-item-body>
+                <div class="form-row">
+                  <div class="form-group full-width">
+                    <label class="form-label">Full Name <span class="required">*</span></label>
+                    <input nbInput fullWidth formControlName="fullName" placeholder="Enter full name" class="form-input">
+                    <div class="error-message" *ngIf="studentForm.get('fullName')?.invalid && studentForm.get('fullName')?.touched">
+                      Full name is required
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label">Email</label>
+                    <input nbInput fullWidth type="email" formControlName="email" placeholder="Enter email" class="form-input">
+                    <div class="error-message" *ngIf="studentForm.get('email')?.invalid && studentForm.get('email')?.touched">
+                      Please enter a valid email address
+                    </div>
+                  </div>
+                  
+                  <div class="form-group">
+                    <label class="form-label">Phone <span class="required">*</span></label>
+                    <input nbInput fullWidth type="tel" formControlName="phone" placeholder="Enter phone number" class="form-input">
+                    <div class="error-message" *ngIf="studentForm.get('phone')?.invalid && studentForm.get('phone')?.touched">
+                      Phone number is required
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label">Date of Birth</label>
+                    <input nbInput fullWidth type="date" formControlName="dob" class="form-input">
+                  </div>
+                  
+                  <div class="form-group">
+                    <label class="form-label">Gender</label>
+                    <nb-radio-group formControlName="gender" class="radio-group">
+                      <nb-radio value="Male" class="radio-option">Male</nb-radio>
+                      <nb-radio value="Female" class="radio-option">Female</nb-radio>
+                      <nb-radio value="Other" class="radio-option">Other</nb-radio>
+                    </nb-radio-group>
+                  </div>
+                </div>
+                
+                <div class="form-row">
+                  <div class="form-group full-width">
+                    <label class="form-label">Address</label>
+                    <textarea nbInput fullWidth formControlName="address" placeholder="Enter address" rows="3" class="form-input"></textarea>
+                  </div>
+                </div>
+              </nb-accordion-item-body>
+            </nb-accordion-item>
+          </nb-accordion>
+          
+          <!-- Guardian Information Section -->
+          <nb-accordion class="form-section">
+            <nb-accordion-item>
+              <nb-accordion-item-header class="section-header">
+                <nb-icon icon="people-outline" class="section-icon"></nb-icon>
+                Guardian Information
+                <span class="section-badge" *ngIf="studentForm.get('guardianName')?.value || studentForm.get('guardianPhone')?.value">
+                  <nb-icon icon="checkmark-circle-2-outline"></nb-icon>
+                </span>
+              </nb-accordion-item-header>
+              <nb-accordion-item-body>
+                <div class="form-row">
+                  <div class="form-group full-width">
+                    <label class="form-label">Guardian Name</label>
+                    <input nbInput fullWidth formControlName="guardianName" placeholder="Enter guardian name" class="form-input">
+                  </div>
+                </div>
+                
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label">Guardian Phone</label>
+                    <input nbInput fullWidth formControlName="guardianPhone" placeholder="Enter guardian phone" class="form-input">
+                  </div>
+                  
+                  <div class="form-group">
+                    <label class="form-label">Guardian Alternative Phone</label>
+                    <input nbInput fullWidth type="tel" formControlName="guardianAlternativeMobile" placeholder="Enter alternative phone" class="form-input">
+                  </div>
+                </div>
+                
+                <div class="form-row">
+                  <div class="form-group full-width">
+                    <label class="form-label">Relationship</label>
+                    <nb-select fullWidth placeholder="Select Relationship" formControlName="relationship" class="form-input">
+                      <nb-option *ngFor="let relation of relationships" [value]="relation">
+                        {{ relation }}
+                      </nb-option>
+                    </nb-select>
+                  </div>
+                </div>
+              </nb-accordion-item-body>
+            </nb-accordion-item>
+          </nb-accordion>
+          
+          <!-- Academic Information Section -->
+          <nb-accordion class="form-section">
+            <nb-accordion-item>
+              <nb-accordion-item-header class="section-header">
+                <nb-icon icon="book-open-outline" class="section-icon"></nb-icon>
+                Academic Information
+                <span class="section-badge" *ngIf="studentForm.get('courseName')?.value || studentForm.get('admissionDate')?.value">
+                  <nb-icon icon="checkmark-circle-2-outline"></nb-icon>
+                </span>
+              </nb-accordion-item-header>
+              <nb-accordion-item-body>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label">Course Name</label>
+                    <nb-select placeholder="Select Course Name" formControlName="courseName" fullWidth class="form-input">
+                      <nb-option value="DHL">DHI</nb-option>
+                      <nb-option value="D.Pharm">D.Pharm</nb-option>
+                      <nb-option value="B.Pharm">B.Pharm</nb-option>
+                      <nb-option value="Pharm D">Pharm D</nb-option>
+                      <nb-option value="M.Pharm">M.Pharm</nb-option>
+                      <nb-option value="Trainee">Trainee</nb-option>
+                      <nb-option value="Staff">Staff</nb-option>
+                      
+                    </nb-select>
+                  </div>
+                  
+                  <div class="form-group">
+                    <label class="form-label">Admission Date</label>
+                    <input nbInput fullWidth type="date" formControlName="admissionDate" class="form-input">
+                  </div>
+                </div>
+              </nb-accordion-item-body>
+            </nb-accordion-item>
+          </nb-accordion>
+          
+          <!-- Additional Information Section -->
+          <nb-accordion class="form-section">
+            <nb-accordion-item>
+              <nb-accordion-item-header class="section-header">
+                <nb-icon icon="info-outline" class="section-icon"></nb-icon>
+                Additional Information
+                <span class="section-badge" *ngIf="studentForm.get('bloodGroup')?.value || studentForm.get('idProof')?.value">
+                  <nb-icon icon="checkmark-circle-2-outline"></nb-icon>
+                </span>
+              </nb-accordion-item-header>
+              <nb-accordion-item-body>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label">Blood Group</label>
+                    <nb-select placeholder="Select Blood Group" formControlName="bloodGroup" fullWidth class="form-input">
+                      <nb-option value="A+">A+</nb-option>
+                      <nb-option value="A-">A-</nb-option>
+                      <nb-option value="B+">B+</nb-option>
+                      <nb-option value="B-">B-</nb-option>
+                      <nb-option value="O+">O+</nb-option>
+                      <nb-option value="O-">O-</nb-option>
+                      <nb-option value="AB+">AB+</nb-option>
+                      <nb-option value="AB-">AB-</nb-option>
+                    </nb-select>
+                  </div>
+                  
+                  <div class="form-group">
+                    <label class="form-label">ID Proof</label>
+                    <input nbInput fullWidth formControlName="idProof" placeholder="Enter ID Proof (e.g. Aadhaar)" class="form-input">
+                  </div>
+                </div>
+              </nb-accordion-item-body>
+            </nb-accordion-item>
+          </nb-accordion>
+          
+          <!-- Action Buttons -->
+          <div class="form-actions">
+            <button nbButton status="basic" type="button" (click)="cancel()" class="action-btn cancel-btn">
+              <nb-icon icon="close-outline"></nb-icon>
+              Cancel
+            </button>
+            <button nbButton status="primary" type="submit" class="action-btn submit-btn" [disabled]="studentForm.invalid">
+              <nb-icon [icon]="isEdit ? 'edit-outline' : 'plus-outline'"></nb-icon>
+              {{ isEdit ? 'Update Student' : 'Add Student' }}
+            </button>
+          </div>
+          
+        </form>
+      </nb-card-body>
+    </nb-card>
+  </nb-layout-column>
+</nb-layout>

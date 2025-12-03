@@ -1,0 +1,34 @@
+<nb-card>
+    <nb-card-header>
+      Pay Periods
+      <button nbButton size="small" status="primary" (click)="create()">Add New</button>
+    </nb-card-header>
+  
+    <nb-card-body>
+      <table class="table table-bordered">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>From</th>
+            <th>To</th>
+            <th>Pay Date</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let p of payPeriods">
+            <td>{{ p.id }}</td>
+            <td>{{ p.attendanceFrom }}</td>
+            <td>{{ p.attendanceTo }}</td>
+            <td>{{ p.payDate }}</td>
+            <td>{{ p.status }}</td>
+            <td>
+              <button nbButton size="tiny" status="info" (click)="edit(p.id)">Edit</button>
+              <button nbButton size="tiny" status="danger" (click)="delete(p.id)">Delete</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </nb-card-body>
+  </nb-card>

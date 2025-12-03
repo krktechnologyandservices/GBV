@@ -1,0 +1,42 @@
+/* Common styles for PayPeriod form */
+.form-group {
+    margin-bottom: 1rem;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .form-group label {
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+  }
+  
+  input[nbInput], nb-select {
+    max-width: 300px;
+  }
+  
+  button[nbButton] {
+    margin-top: 1rem;
+  }
+  
+  /* Table styling for PayPeriod list */
+  table.table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  table.table th,
+  table.table td {
+    padding: 0.75rem;
+    border: 1px solid #e5e5e5;
+    text-align: left;
+  }
+  
+  table.table th {
+    background-color: #f7f9fc;
+    font-weight: 600;
+  }
+  
+  button[nbButton] {
+    margin-right: 0.5rem;
+  }
+  

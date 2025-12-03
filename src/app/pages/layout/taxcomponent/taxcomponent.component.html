@@ -1,0 +1,215 @@
+<nb-card>
+    <nb-card-header>
+      <div class="header-container">
+        <h4>Tax Components Management</h4>
+        <div class="header-actions">
+          <form [formGroup]="searchForm" class="search-form">
+            <input 
+              type="text" 
+              nbInput 
+              formControlName="searchQuery"
+              placeholder="Search components..."
+              class="search-input">
+            <button nbButton ghost status="basic" class="search-button">
+              <nb-icon icon="search"></nb-icon>
+            </button>
+          </form>
+  
+          <button nbButton status="primary" (click)="toggleForm()" [disabled]="isLoading">
+            <nb-icon icon="plus"></nb-icon> {{ showForm ? 'Cancel' : 'Add Component' }}
+          </button>
+        </div>
+      </div>
+  
+      <nb-tabset fullWidth (changeTab)="changeTab($event.tabId)">
+        <nb-tab tabId="all" title="All Components"></nb-tab>
+        <nb-tab tabId="active" title="Active Only"></nb-tab>
+        <nb-tab *ngFor="let section of sectionCodes" 
+                [tabId]="section" 
+                [title]="'Section ' + section"></nb-tab>
+      </nb-tabset>
+    </nb-card-header>
+  
+    <nb-card-body>
+      <!-- Form Section -->
+      <div *ngIf="showForm" class="form-section">
+        <nb-card>
+          <nb-card-header>
+            <h5>{{ isEditMode ? 'Edit' : 'Add New' }} Tax Component</h5>
+          </nb-card-header>
+          <nb-card-body>
+            <form [formGroup]="form" (ngSubmit)="onSubmit()">
+              <!-- Component Name -->
+              <nb-form-field>
+                <nb-icon nbPrefix icon="edit-2"></nb-icon>
+                <input nbInput 
+                      formControlName="componentName" 
+                      placeholder="Component Name *"
+                      [status]="form.get('componentName')?.invalid ? 'danger' : 'basic'">
+                <nb-error *ngIf="form.get('componentName')?.hasError('required')">
+                  Component name is required
+                </nb-error>
+              </nb-form-field>
+  
+              <!-- Tax Category -->
+              <nb-form-field>
+                <nb-icon nbPrefix icon="layers"></nb-icon>
+                <nb-select formControlName="taxCategoryId" 
+                          placeholder="Tax Category *"
+                          [status]="form.get('taxCategoryId')?.invalid ? 'danger' : 'basic'">
+                  <nb-option *ngFor="let category of taxCategories" [value]="category.id">
+                    {{ category.categoryName }} ({{ category.sectionCode }})
+                  </nb-option>
+                </nb-select>
+                <nb-error *ngIf="form.get('taxCategoryId')?.hasError('required')">
+                  Tax category is required
+                </nb-error>
+              </nb-form-field>
+  
+              <!-- Calculation Type -->
+              <nb-form-field>
+                <nb-icon nbPrefix icon="calculator"></nb-icon>
+                <nb-select formControlName="calculationType" 
+                          placeholder="Calculation Type *"
+                          [status]="form.get('calculationType')?.invalid ? 'danger' : 'basic'">
+                  <nb-option *ngFor="let type of calculationTypes" [value]="type">
+                    {{ type }}
+                  </nb-option>
+                </nb-select>
+              </nb-form-field>
+  
+              <!-- Section Based -->
+              <div class="form-row">
+                <nb-checkbox formControlName="isSectionBased">Section Based Deduction/Exemption</nb-checkbox>
+                
+                <nb-form-field *ngIf="form.get('isSectionBased')?.value">
+                  <nb-icon nbPrefix icon="book-open"></nb-icon>
+                  <nb-select formControlName="sectionCode" 
+                            placeholder="Income Tax Section *"
+                            [status]="form.get('sectionCode')?.invalid ? 'danger' : 'basic'">
+                    <nb-option *ngFor="let code of sectionCodes" [value]="code">
+                      Section {{ code }}
+                    </nb-option>
+                  </nb-select>
+                  <nb-error *ngIf="form.get('sectionCode')?.hasError('required')">
+                    Section code is required
+                  </nb-error>
+                </nb-form-field>
+              </div>
+  
+              <!-- Maximum Limit -->
+              <div class="form-row">
+                <nb-checkbox formControlName="hasMaximumLimit">Has Maximum Limit</nb-checkbox>
+                
+                <nb-form-field *ngIf="form.get('hasMaximumLimit')?.value">
+                  <nb-icon nbPrefix icon="credit-card"></nb-icon>
+                  <input nbInput 
+                        type="number" 
+                        formControlName="maximumLimit" 
+                        placeholder="Maximum Limit (₹) *"
+                        [status]="form.get('maximumLimit')?.invalid ? 'danger' : 'basic'">
+                  <nb-error *ngIf="form.get('maximumLimit')?.hasError('required')">
+                    Maximum limit is required
+                  </nb-error>
+                  <nb-error *ngIf="form.get('maximumLimit')?.hasError('min')">
+                    Must be a positive value
+                  </nb-error>
+                </nb-form-field>
+              </div>
+  
+              <!-- Other Options -->
+              <div class="options-grid">
+                <nb-checkbox formControlName="isDeduction">Is Deduction</nb-checkbox>
+                <nb-checkbox formControlName="proofRequired">Proof Required</nb-checkbox>
+                <nb-checkbox formControlName="isActive">Is Active</nb-checkbox>
+              </div>
+  
+              <!-- Form Actions -->
+              <div class="form-actions">
+                <button nbButton 
+                        status="primary" 
+                        type="submit" 
+                        [disabled]="isLoading || form.invalid"
+                        [class.btn-pulse]="isLoading">
+                  <nb-icon *ngIf="!isLoading" icon="save"></nb-icon>
+                  <nb-icon *ngIf="isLoading" icon="loader-outline" animation="pulse"></nb-icon>
+                  {{ isEditMode ? 'Update' : 'Save' }}
+                </button>
+                <button nbButton 
+                        status="basic" 
+                        type="button" 
+                        (click)="toggleForm()" 
+                        class="ml-2">
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </nb-card-body>
+        </nb-card>
+      </div>
+  
+      <!-- List Section -->
+      <div *ngIf="!showForm" class="list-section">
+        <nb-list>
+          <nb-list-item *ngFor="let component of filteredComponents" class="component-item">
+            <div class="item-container">
+              <div class="item-content">
+                <div class="item-header">
+                  <h5>{{ component.componentName }}</h5>
+                  <nb-badge *ngIf="!component.isActive" 
+                            text="Inactive" 
+                            status="basic"></nb-badge>
+                </div>
+                
+                <div class="item-meta">
+                  <nb-badge [text]="component.taxCategoryName" 
+                            status="primary"></nb-badge>
+                  <nb-badge *ngIf="component.sectionCode" 
+                            [text]="'Sec ' + component.sectionCode" 
+                            status="info"></nb-badge>
+                  <nb-badge *ngIf="component.maximumLimit" 
+                            [text]="'₹' + component.maximumLimit + ' limit'" 
+                            status="warning"></nb-badge>
+                  <nb-badge *ngIf="component.proofRequired" 
+                            text="Proof Required" 
+                            status="danger"></nb-badge>
+                </div>
+              </div>
+              
+              <div class="item-actions">
+                <button nbButton 
+                        ghost 
+                        status="primary" 
+                        size="small" 
+                        (click)="editComponent(component.id)">
+                  <nb-icon icon="edit"></nb-icon>
+                </button>
+                <button nbButton 
+                        ghost 
+                        [status]="component.isActive ? 'danger' : 'success'" 
+                        size="small" 
+                        (click)="toggleStatus(component.id)">
+                  <nb-icon [icon]="component.isActive ? 'toggle-left' : 'toggle-right'"></nb-icon>
+                </button>
+              </div>
+            </div>
+          </nb-list-item>
+        </nb-list>
+        
+        <div *ngIf="!isLoading && filteredComponents.length === 0" class="no-results">
+          <nb-icon icon="file-text-outline"></nb-icon>
+          <p>No tax components found</p>
+          <button nbButton 
+                  status="primary" 
+                  size="small" 
+                  (click)="toggleForm()">
+            Create New Component
+          </button>
+        </div>
+        
+        <nb-spinner *ngIf="isLoading" 
+                    size="giant" 
+                    status="primary"></nb-spinner>
+      </div>
+    </nb-card-body>
+  </nb-card>

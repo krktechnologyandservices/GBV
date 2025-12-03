@@ -1,0 +1,60 @@
+<nb-card>
+    <nb-card-header>Attendance Reasons</nb-card-header>
+    <nb-card-body>
+      <form [formGroup]="form" (ngSubmit)="save()">
+        <div class="form-grid">
+          <nb-form-field>
+            <label for="code">Code</label>
+            <input nbInput formControlName="code" id="code" />
+            <nb-form-field-error *ngIf="form.get('code')?.invalid && form.get('code')?.touched">
+              Code is required
+            </nb-form-field-error>
+          </nb-form-field>
+  
+          <nb-form-field>
+            <label for="description">Description</label>
+            <input nbInput formControlName="description" id="description" />
+            <nb-form-field-error *ngIf="form.get('description')?.invalid && form.get('description')?.touched">
+              Description is required
+            </nb-form-field-error>
+          </nb-form-field>
+  
+          <nb-checkbox formControlName="requiresApproval">Requires Approval</nb-checkbox>
+  
+          <div class="buttons">
+            <button nbButton status="success" type="submit" [disabled]="form.invalid">
+              {{ isEdit ? 'Update' : 'Add' }}
+            </button>
+            <button nbButton status="danger" type="button" (click)="cancel()" *ngIf="isEdit">Cancel</button>
+          </div>
+        </div>
+      </form>
+  
+      <nb-spinner *ngIf="loading" size="small"></nb-spinner>
+  
+      <table class="table table-striped" *ngIf="!loading && reasons.length">
+        <thead>
+          <tr>
+            <th>Code</th>
+            <th>Description</th>
+            <th>Requires Approval</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let r of reasons">
+            <td>{{ r.code }}</td>
+            <td>{{ r.description }}</td>
+            <td>{{ r.requiresApproval ? 'Yes' : 'No' }}</td>
+            <td>
+              <button nbButton size="tiny" status="info" (click)="edit(r)">Edit</button>
+              <button nbButton size="tiny" status="danger" (click)="delete(r.code)">Delete</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+  
+      <p *ngIf="!loading && !reasons.length">No attendance reasons found.</p>
+    </nb-card-body>
+  </nb-card>
+  

@@ -1,0 +1,90 @@
+<nb-layout>
+  <nb-layout-column>
+
+    <nb-card>
+      <nb-card-header>Book Room</nb-card-header>
+      <nb-card-body>
+        <form [formGroup]="bookingForm" (ngSubmit)="save()">
+
+          <!-- Student Dropdown -->
+          <div class="form-group">
+            <label>Student</label>
+            <nb-select fullWidth placeholder="Select Student" formControlName="studentId">
+              <nb-option *ngFor="let s of students" [value]="s.studentId">
+                {{ s.fullName }}'-'{{ s.phone }} '-' ({{ s.email }})
+              </nb-option>
+            </nb-select>
+            <div *ngIf="bookingForm.get('studentId')?.touched && bookingForm.get('studentId')?.hasError('required')" class="text-danger">
+              Student is required
+            </div>
+          </div>
+
+          <!-- Room Dropdown -->
+          <div class="form-group">
+            <label>Room</label>
+            <nb-select fullWidth placeholder="Select Room" formControlName="roomId">
+              <nb-option *ngFor="let r of rooms" [value]="r.id">
+                Room {{ r.roomNumber }} - Capacity {{ r.capacity }}
+              </nb-option>
+            </nb-select>
+            <div *ngIf="bookingForm.get('roomId')?.touched && bookingForm.get('roomId')?.hasError('required')" class="text-danger">
+              Room selection is required
+            </div>
+          </div>
+
+          <!-- Tariff Dropdown -->
+          <div class="form-group">
+            <label>Tariff Period</label>
+            <nb-select fullWidth placeholder="Select Tariff" formControlName="tariffPeriod">
+              <nb-option *ngFor="let t of tariffs" [value]="t.period">
+                {{ t.period }} - ₹{{ t.rate }}
+              </nb-option>
+            </nb-select>
+            <div *ngIf="bookingForm.get('tariffPeriod')?.touched && bookingForm.get('tariffPeriod')?.hasError('required')" class="text-danger">
+              Tariff selection is required
+            </div>
+          </div>
+
+          <!-- Start Date -->
+          <div class="form-group">
+            <label>Start Date</label>
+            <input nbInput type="date" fullWidth formControlName="startDate">
+            <div *ngIf="bookingForm.get('startDate')?.touched && bookingForm.get('startDate')?.hasError('required')" class="text-danger">
+              Start Date is required
+            </div>
+          </div>
+
+          <!-- End Date -->
+          <div class="form-group">
+            <label>End Date</label>
+            <input nbInput type="date" fullWidth formControlName="endDate">
+            <div *ngIf="bookingForm.get('endDate')?.touched && bookingForm.get('endDate')?.hasError('required')" class="text-danger">
+              End Date is required
+            </div>
+            <div *ngIf="bookingForm.hasError('dateRangeInvalid') && bookingForm.get('endDate')?.touched" class="text-danger">
+              End Date must be greater than Start Date
+            </div>
+          </div>
+
+          <!-- Amount -->
+          <div class="form-group">
+            <label>Amount</label>
+            <input nbInput type="number" fullWidth formControlName="amount" disabled>
+          </div>
+
+          <!-- Buttons -->
+          <div style="margin-top:15px;">
+            <button nbButton status="primary" type="submit" [disabled]="bookingForm.invalid">
+              Book Room
+            </button>
+            <button nbButton status="danger" type="button" (click)="cancel()">
+              Cancel
+            </button>
+          </div>
+
+        </form>
+      </nb-card-body>
+    </nb-card>
+
+  </nb-layout-column>
+</nb-layout>

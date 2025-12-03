@@ -1,0 +1,64 @@
+<nb-card *ngIf="config">
+  <nb-card-header>{{ config.title }}</nb-card-header>
+  <nb-card-body>
+
+    <!-- Filters + Manual Row Submission -->
+    <form [formGroup]="filtersForm" class="filter-form" (ngSubmit)="applyFiltersAndManualRow()">
+      <div *ngFor="let f of config.filters" class="filter-item">
+        <input *ngIf="f.type==='text'" nbInput fullWidth [formControlName]="f.name" [placeholder]="f.label"/>
+        <input *ngIf="f.type==='number'" nbInput type="number" fullWidth [formControlName]="f.name" [placeholder]="f.label"/>
+        <input *ngIf="f.type==='date'" nbInput type="date" fullWidth [formControlName]="f.name" [placeholder]="f.label"/>
+        <nb-select *ngIf="f.type==='select'" fullWidth multiple [placeholder]="f.label" [formControlName]="f.name">
+          <nb-option *ngFor="let opt of f.options" [value]="opt.value">{{ opt.label }}</nb-option>
+        </nb-select>
+      </div>
+
+      <!-- Submit & Export Buttons -->
+      <div class="filter-actions">
+        <button nbButton status="primary" type="submit" [disabled]="!reportDataFull.length">Generate / Filter</button>
+        <button nbButton status="info" (click)="exportToPDF()" type="button">PDF</button>
+        <button nbButton status="success" (click)="exportToExcel()" type="button">Excel</button>
+      </div>
+    </form>
+
+    <!-- Manual Row Configuration -->
+    <div *ngIf="config.enableManualEntry" class="manual-config">
+      <h5>Manual Row Configuration</h5>
+      <div class="manual-inputs">
+        <div *ngFor="let col of config.columns" class="manual-col">
+          <label>{{ col.header }}</label>
+          <input *ngIf="col.type!=='number'" nbInput [(ngModel)]="manualRowConfig.textValues[col.field]" [name]="col.field"/>
+          <nb-select *ngIf="col.type==='number'" [(ngModel)]="manualRowConfig.numericValues[col.field]" [name]="col.field">
+            <nb-option value="">Manual</nb-option>
+            <nb-option value="SUM">SUM</nb-option>
+            <nb-option value="AVERAGE">AVERAGE</nb-option>
+          </nb-select>
+        </div>
+      </div>
+      <div class="manual-actions">
+        <label>Position:</label>
+        <nb-select [(ngModel)]="manualRowConfig.position">
+          <nb-option value="top">Top</nb-option>
+          <nb-option value="bottom">Bottom</nb-option>
+        </nb-select>
+      </div>
+    </div>
+
+    <!-- Report Table -->
+    <table class="nb-table">
+      <thead>
+        <tr>
+          <th *ngFor="let col of config.columns">{{ col.header }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let row of reportData">
+          <td *ngFor="let col of config.columns" [attr.data-label]="col.header">{{ row[col.field] }}</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div *ngIf="!reportData.length" class="no-data-text">No data available</div>
+
+  </nb-card-body>
+</nb-card>

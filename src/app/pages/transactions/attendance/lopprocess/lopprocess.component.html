@@ -1,0 +1,51 @@
+<nb-card>
+  <nb-card-header>
+    Process Loss of Pay (LOP)
+  </nb-card-header>
+
+  <nb-card-body>
+    <nb-select [(selected)]="selectedPeriodId" placeholder="Select Pay Period">
+      <nb-option *ngFor="let p of payPeriods" [value]="p.id">
+        {{ p.attendanceFrom }} - {{ p.attendanceTo }} ({{ p.status }})
+      </nb-option>
+    </nb-select>
+
+    <button nbButton status="info" (click)="process()" [disabled]="!selectedPeriodId">
+      Process LOP
+    </button>
+
+    <button nbButton status="success" (click)="exportToExcel()" *ngIf="result?.summaries.length">
+      Export to Excel
+    </button>
+
+    <nb-spinner *ngIf="loading"></nb-spinner>
+
+    <div *ngIf="result?.summaries.length">
+      <h4>Total Working Days: {{ result.totalDays }}</h4>
+      <table class="table table-bordered">
+        <thead>
+          <tr>
+            <th>Employee ID</th>
+         
+            <th>LOP Days</th>
+            <th>Manual Correction</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let s of result.summaries">
+            <td>{{ s.employeeId }}</td>
+            
+            <td>{{ s.calculatedLopDays }}</td>
+            <td>
+              <input type="number" [(ngModel)]="s.manualCorrection" class="form-control" />
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <button nbButton status="primary" (click)="saveManualCorrections()">
+        Save Corrections
+      </button>
+    </div>
+  </nb-card-body>
+</nb-card>

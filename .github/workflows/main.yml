@@ -1,0 +1,36 @@
+name: Deploy Angular App
+
+on:
+  push:
+    branches:
+      - main   # or master, depending on your branch
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '22.17.0' # or the version you use in Angular
+
+      - name: Install dependencies
+        run: npm install --legacy-peer-deps
+
+      - name: Build Angular app
+        run: npm run build -- --configuration production --base-href /
+
+      # Upload dist folder to your SmarterASP.net via FTP
+      - name: Deploy via FTP
+        uses: SamKirkland/ftp-deploy-action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          local-dir: ./dist/midukkanhostelHub/   # 👈 adjust to match your dist folder name
+          server-dir: /wwwroot/
+          dangerous-clean-slate: true

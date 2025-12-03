@@ -1,0 +1,98 @@
+<nb-card>
+  <nb-card-header>
+    <h3>Organization Attribute Manager</h3>
+  </nb-card-header>
+
+  <nb-card-body>
+    <nb-spinner *ngIf="isLoading" size="giant" class="overlay-spinner"></nb-spinner>
+
+    <!-- Create Attribute Form -->
+    <nb-card>
+      <nb-card-header>Create New Attribute</nb-card-header>
+      <nb-card-body>
+        <form (ngSubmit)="createAttribute()">
+          <div class="form-grid row">
+            <div class="col-md-4">
+              <input nbInput
+                placeholder="Attribute Name"
+                [(ngModel)]="newAttribute.attributeName"
+                name="attributeName"
+                [status]="!newAttribute.attributeName && isLoading === false ? 'danger' : 'basic'"
+                required />
+            </div>
+
+            <div class="col-md-3">
+              <nb-select [(ngModel)]="newAttribute.dataType" name="dataType" fullWidth>
+                <nb-option *ngFor="let dt of ['Text', 'Number', 'Date', 'Dropdown']" [value]="dt">{{ dt }}</nb-option>
+              </nb-select>
+            </div>
+
+            <div class="col-md-2">
+              <nb-checkbox [(ngModel)]="newAttribute.isRequired" name="isRequired">Required</nb-checkbox>
+            </div>
+
+            <div class="col-md-2">
+              <nb-checkbox [(ngModel)]="newAttribute.isUnique" name="isUnique">Unique</nb-checkbox>
+            </div>
+
+            <div class="col-md-1">
+              <button nbButton status="primary" [disabled]="isLoading" type="submit">
+                {{ isLoading ? 'Creating...' : 'Create' }}
+              </button>
+            </div>
+          </div>
+        </form>
+      </nb-card-body>
+    </nb-card>
+
+    <!-- Attributes List -->
+    <nb-list>
+      <nb-list-item *ngFor="let attr of attributes" 
+                    (click)="onSelectAttribute(attr)"
+                    [class.selected]="selectedAttribute === attr"
+                    [class.deleted]="attr.IsDeleted">
+        <div class="attribute-item">
+          <span>{{ attr.attributeName }} ({{ attr.dataType }})</span>
+
+          <div class="attribute-badges">
+            <nb-badge *ngIf="attr.IsRequired" status="warning" text="Required"></nb-badge>
+            <nb-badge *ngIf="attr.IsUnique" status="success" text="Unique"></nb-badge>
+            <nb-badge *ngIf="attr.IsDeleted" status="danger" text="Deleted"></nb-badge>
+          </div>
+
+          <button nbButton size="small" status="danger" (click)="deleteAttribute(attr.id!, $event)">
+            <nb-icon icon="trash-2-outline"></nb-icon>
+          </button>
+        </div>
+      </nb-list-item>
+    </nb-list>
+
+    <!-- Dropdown Values Section -->
+    <nb-card *ngIf="selectedAttribute?.dataType === 'Dropdown'">
+      <nb-card-header>Manage Dropdown Values for {{ selectedAttribute.attributeName }}</nb-card-header>
+      <nb-card-body>
+        <div class="value-management">
+          <div class="value-input">
+            <input nbInput
+              placeholder="New dropdown value"
+              [(ngModel)]="newDropdownValue"
+              [disabled]="isLoading"
+              fullWidth />
+            <button nbButton status="success" (click)="addDropdownValue()" [disabled]="!newDropdownValue.trim() || isLoading">
+              <nb-icon icon="plus-outline"></nb-icon> Add
+            </button>
+          </div>
+
+          <nb-list class="values-list">
+            <nb-list-item *ngFor="let val of dropdownValues" class="value-item">
+              <span>{{ val.value }}</span>
+              <button nbButton size="small" status="danger" (click)="deleteDropdownValue(val.id!, $event)" [disabled]="isLoading">
+                <nb-icon icon="trash-2-outline"></nb-icon>
+              </button>
+            </nb-list-item>
+          </nb-list>
+        </div>
+      </nb-card-body>
+    </nb-card>
+  </nb-card-body>
+</nb-card>

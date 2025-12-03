@@ -1,0 +1,21 @@
+<nb-card>
+    <nb-card-header>{{ title }}</nb-card-header>
+    <nb-card-body>
+      <p>{{ message }}</p>
+    </nb-card-body>
+    <nb-card-footer>
+      <div class="d-flex justify-content-end">
+        <button nbButton 
+                [status]="dangerMode ? 'danger' : 'primary'" 
+                (click)="confirm()"
+                class="mr-2">
+          {{ confirmText }}
+        </button>
+        <button nbButton 
+                status="basic" 
+                (click)="cancel()">
+          {{ cancelText }}
+        </button>
+      </div>
+    </nb-card-footer>
+  </nb-card>

@@ -1,0 +1,96 @@
+<nb-card class="mb-3">
+  <nb-card-header>
+    <nb-select placeholder="Select Employee" [(selected)]="selectedEmployeeId" (selectedChange)="onEmployeeChange()">
+      <nb-option *ngFor="let emp of employees" [value]="emp.employeeId">
+        {{ emp.employeeCode }} - {{ emp.employeeName }}
+      </nb-option>
+    </nb-select>
+    <nb-checkbox [(ngModel)]="showAll" class="text-white">Show All Components</nb-checkbox>
+  </nb-card-header>
+</nb-card>
+
+<!-- ✅ Add this wrapper for PDF generation -->
+<div id="payslip-content">
+  <nb-card class="payslip-card shadow-sm border-primary">
+    <nb-card-header class="bg-primary text-white rounded-top py-3">
+      <div class="d-flex flex-wrap justify-between align-items-center">
+        <div class="fw-bold fs-5">Payslip - {{ payslip.employeeName }}</div>
+      
+      </div>
+    </nb-card-header>
+
+    <nb-card-body>
+      <div class="employee-info mb-3">
+        <div><strong>Employee Code:</strong> {{ payslip.employeeCode }}</div>
+        <div><strong>Email:</strong> {{ payslip.email }}</div>
+        <div><strong>Bank:</strong> {{ payslip.bankName }}</div>
+        <div><strong>Account No:</strong> {{ payslip.accountNo }}</div>
+        <div><strong>Pay Period:</strong> {{ payslip.processMonth }}</div>
+      </div>
+
+      <div class="row g-3">
+        <div class="col-12 col-md-6">
+          <nb-card class="h-100">
+            <nb-card-header class="bg-success text-white">Earnings</nb-card-header>
+            <nb-card-body>
+              <table class="table table-striped table-bordered">
+                <thead class="table-success text-dark">
+                  <tr><th>Component</th><th class="text-end">Amount</th></tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let comp of earnings">
+                    <td>{{ comp.componentDescription }}</td>
+                    <td class="text-end">{{ comp.netAmount | currency:'INR' }}</td>
+                  </tr>
+                </tbody>
+                <tfoot class="fw-bold">
+                  <tr>
+                    <td>Gross Earnings</td>
+                    <td class="text-end">{{ grossEarnings | currency:'INR' }}</td>
+                  </tr>
+                </tfoot>
+              </table>
+            </nb-card-body>
+          </nb-card>
+        </div>
+
+        <div class="col-12 col-md-6">
+          <nb-card class="h-100">
+            <nb-card-header class="bg-danger text-white">Deductions</nb-card-header>
+            <nb-card-body>
+              <table class="table table-striped table-bordered">
+                <thead class="table-danger text-dark">
+                  <tr><th>Component</th><th class="text-end">Amount</th></tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let comp of deductions">
+                    <td>{{ comp.componentDescription }}</td>
+                    <td class="text-end">{{ comp.netAmount | currency:'INR' }}</td>
+                  </tr>
+                </tbody>
+                <tfoot class="fw-bold">
+                  <tr>
+                    <td>Gross Deductions</td>
+                    <td class="text-end">{{ grossDeductions | currency:'INR' }}</td>
+                  </tr>
+                </tfoot>
+              </table>
+            </nb-card-body>
+          </nb-card>
+        </div>
+      </div>
+
+      <div class="mt-4 text-end fs-5 fw-bold bg-light p-3 rounded border border-success">
+        Net Pay: <span class="text-success">{{ netPay | currency:'INR' }}</span>
+      </div>
+    </nb-card-body>
+  </nb-card>
+</div>
+
+<!-- ✅ Button to trigger PDF download -->
+<div class="text-end mt-3">
+  <button nbButton status="primary" size="medium" outline (click)="downloadPDF()">
+    <nb-icon icon="download-outline" pack="eva"></nb-icon>
+    &nbsp;Download PDF
+  </button>
+</div>

@@ -1,0 +1,77 @@
+<form [formGroup]="form" (ngSubmit)="onSubmit()">
+    <nb-card>
+      <nb-card-header>Attendance Entry</nb-card-header>
+  
+      <nb-card-body>
+        <div class="form-group">
+          <label for="employeeId">Employee ID</label>
+          <nb-form-field>
+            <input nbInput formControlName="employeeId" id="employeeId" type="number" />
+          </nb-form-field>
+        </div>
+  
+        <div class="form-group">
+          <label for="attendanceDate">Date</label>
+          <nb-form-field>
+            <input nbInput formControlName="attendanceDate" id="attendanceDate" type="date" />
+          </nb-form-field>
+        </div>
+  
+        <div class="form-group">
+          <label for="checkInTime">Check-In</label>
+          <nb-form-field>
+            <input nbInput formControlName="checkInTime" id="checkInTime" type="time" />
+          </nb-form-field>
+        </div>
+  
+        <div class="form-group">
+          <label for="checkOutTime">Check-Out</label>
+          <nb-form-field>
+            <input nbInput formControlName="checkOutTime" id="checkOutTime" type="time" />
+          </nb-form-field>
+        </div>
+  
+        <div class="form-group">
+          <label for="status">Status</label>
+          <nb-form-field>
+            <input nbInput formControlName="status" id="status" />
+          </nb-form-field>
+        </div>
+  
+        <div class="form-group">
+          <label for="attendanceType">Type</label>
+          <nb-form-field>
+            <nb-select formControlName="attendanceType" id="attendanceType">
+              <nb-option value="Manual">Manual</nb-option>
+              <nb-option value="PunchIn">Punch In</nb-option>
+            </nb-select>
+          </nb-form-field>
+        </div>
+  
+        <div class="form-group">
+          <label for="remarks">Remarks</label>
+          <nb-form-field>
+            <input nbInput formControlName="remarks" id="remarks" />
+          </nb-form-field>
+        </div>
+  
+        <div class="form-group">
+          <label for="reasonCode">Reason Code</label>
+          <nb-form-field>
+            <input nbInput formControlName="reasonCode" id="reasonCode" />
+          </nb-form-field>
+        </div>
+  
+        <div class="form-group">
+          <nb-checkbox formControlName="requiresApproval">
+            Requires Approval
+          </nb-checkbox>
+        </div>
+      </nb-card-body>
+  
+      <nb-card-footer>
+        <button nbButton status="primary" type="submit">Save</button>
+      </nb-card-footer>
+    </nb-card>
+  </form>
+  

@@ -1,0 +1,354 @@
+<!-- paymentregister.component.html -->
+<div class="layout-wrapper">
+  <nb-card class="payment-register-card">
+    <nb-card-header class="payment-register-header">
+      <div class="header-content">
+        <div class="title-section">
+          <h4 class="title">Payment Register</h4>
+          <p class="subtitle">View and manage payment records</p>
+        </div>
+        <div class="header-actions">
+          <button nbButton status="primary" size="small" (click)="refreshData()" class="action-btn">
+            <nb-icon icon="refresh-outline"></nb-icon>
+            Refresh
+          </button>
+        </div>
+      </div>
+    </nb-card-header>
+
+    <nb-card-body class="payment-register-body">
+      <!-- Filters Section -->
+      <form [formGroup]="filterForm" (ngSubmit)="submitFilter()">
+        <nb-card class="filter-card">
+          <nb-card-header class="filter-header">
+            <div class="filter-header-content">
+              <h5 class="filter-title">
+                <nb-icon icon="funnel-outline" class="filter-icon"></nb-icon>
+                Filters
+              </h5>
+              <button nbButton ghost size="small" type="button" (click)="toggleFilterExpansion()" class="expand-btn">
+                <nb-icon [icon]="isFiltersExpanded ? 'chevron-up-outline' : 'chevron-down-outline'"></nb-icon>
+                {{ isFiltersExpanded ? 'Collapse' : 'Expand' }}
+              </button>
+            </div>
+          </nb-card-header>
+          
+          <nb-card-body class="filter-body" [class.collapsed]="!isFiltersExpanded">
+            <div class="filter-grid">
+              <div class="filter-item">
+                <label class="filter-label">
+                  <nb-icon icon="home-outline"></nb-icon>
+                  Rooms
+                </label>
+                <nb-select placeholder="Select Rooms" formControlName="rooms" multiple fullWidth size="small">
+                  <nb-option *ngFor="let room of rooms; trackBy: trackByRoomId" [value]="room.Id">
+                    <div class="option-content">
+                      <nb-icon icon="home-outline"></nb-icon>
+                      {{ room.Name }}
+                    </div>
+                  </nb-option>
+                </nb-select>
+              </div>
+
+              <div class="filter-item">
+                <label class="filter-label">
+                  <nb-icon icon="person-outline"></nb-icon>
+                  Students
+                </label>
+                <nb-select placeholder="Select Students" formControlName="students" multiple fullWidth size="small">
+                  <nb-option *ngFor="let student of students; trackBy: trackByStudentId" [value]="student.Id">
+                    <div class="option-content">
+                      <nb-icon icon="person-outline"></nb-icon>
+                      {{ student.FullName }}
+                    </div>
+                  </nb-option>
+                </nb-select>
+              </div>
+
+              <div class="filter-item">
+                <label class="filter-label">
+                  <nb-icon icon="calendar-outline"></nb-icon>
+                  From Date
+                </label>
+                <input nbInput type="date" formControlName="fromDate" fullWidth size="small">
+              </div>
+
+              <div class="filter-item">
+                <label class="filter-label">
+                  <nb-icon icon="calendar-outline"></nb-icon>
+                  To Date
+                </label>
+                <input nbInput type="date" formControlName="toDate" fullWidth size="small">
+              </div>
+            </div>
+
+            <div class="filter-actions">
+              <button nbButton status="primary" type="submit" class="action-btn" [disabled]="isLoading">
+                <nb-icon icon="search-outline"></nb-icon>
+                {{ isLoading ? 'Searching...' : 'Apply Filters' }}
+              </button>
+              <button nbButton status="basic" type="button" (click)="resetFilters()" class="action-btn">
+                <nb-icon icon="refresh-outline"></nb-icon>
+                Reset
+              </button>
+              <button nbButton status="success" type="button" (click)="exportPDF()" class="action-btn" [disabled]="payments.length === 0">
+                <nb-icon icon="download-outline"></nb-icon>
+                Export PDF
+              </button>
+            </div>
+          </nb-card-body>
+        </nb-card>
+      </form>
+
+      <!-- Results Section -->
+      <div *ngIf="payments.length > 0" class="results-section">
+        <div class="results-header">
+          <div class="results-info">
+            <h5 class="results-title">
+              <nb-icon icon="list-outline" class="results-icon"></nb-icon>
+              Payment Results
+            </h5>
+            <span class="results-count">{{ payments.length }} records found</span>
+          </div>
+          <div class="results-actions">
+            <button nbButton ghost size="small" (click)="toggleViewMode()" class="view-toggle">
+              <nb-icon [icon]="isTableView ? 'grid-outline' : 'list-outline'"></nb-icon>
+              {{ isTableView ? 'Card View' : 'Table View' }}
+            </button>
+          </div>
+        </div>
+
+        <!-- Desktop Table View -->
+        <div *ngIf="isTableView" class="table-container desktop-view">
+          <table class="payments-table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Student</th>
+                <th>Room</th>
+                <th>Payment Type</th>
+                <th>Payment Mode</th>
+                <th class="amount-column">Amount</th>
+                <th>Status</th>
+                <th class="actions-column">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let pay of payments; trackBy: trackByPaymentId" class="payment-row">
+                <td>
+                  <div class="payment-date">
+                    <nb-icon icon="calendar-outline" class="data-icon"></nb-icon>
+                    {{ pay.paymentDate | date:'mediumDate' }}
+                  </div>
+                </td>
+                <td>
+                  <div class="student-info">
+                    <nb-icon icon="person-outline" class="data-icon"></nb-icon>
+                    {{ pay.studentName }}
+                  </div>
+                </td>
+                <td>
+                  <div class="room-info">
+                    <nb-icon icon="home-outline" class="data-icon"></nb-icon>
+                    {{ pay.roomNo }}
+                  </div>
+                </td>
+                <td>
+                  <span class="payment-type">{{ pay.paymentType }}</span>
+                </td>
+                <td>
+                  <span class="payment-mode">{{ pay.paymentMode }}</span>
+                </td>
+                <td class="amount-cell">
+                  <div class="amount-badge">
+                    {{ pay.paymentAmount | currency:'INR' }}
+                  </div>
+                </td>
+                <td>
+                  <div class="status-badge" [ngClass]="getStatusClass(pay.paymentStatus)">
+                    <nb-icon [icon]="getStatusIcon(pay.paymentStatus)" class="status-icon"></nb-icon>
+                    {{ pay.paymentStatus }}
+                  </div>
+                </td>
+                <td class="actions-cell">
+                  <button nbButton ghost size="small" (click)="viewPaymentDetails(pay)" class="action-icon">
+                    <nb-icon icon="eye-outline"></nb-icon>
+                  </button>
+                  <button nbButton ghost size="small" (click)="exportSinglePDF(pay)" class="action-icon">
+                    <nb-icon icon="download-outline"></nb-icon>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Mobile Card View -->
+        <div *ngIf="!isTableView" class="mobile-view">
+          <div class="cards-grid">
+            <nb-card *ngFor="let pay of payments; trackBy: trackByPaymentId" class="payment-card">
+              <nb-card-header class="payment-card-header">
+                <div class="payment-title">
+                  <div class="student-avatar">
+                    <nb-icon icon="person-outline" status="primary"></nb-icon>
+                  </div>
+                  <div class="title-content">
+                    <h6 class="student-name">{{ pay.studentName }}</h6>
+                    <span class="room-number">Room {{ pay.roomNo }}</span>
+                  </div>
+                </div>
+                <div class="payment-status">
+                  <div class="status-badge" [ngClass]="getStatusClass(pay.paymentStatus)">
+                    <nb-icon [icon]="getStatusIcon(pay.paymentStatus)" class="status-icon"></nb-icon>
+                    {{ pay.paymentStatus }}
+                  </div>
+                </div>
+              </nb-card-header>
+
+              <nb-card-body class="payment-card-body">
+                <div class="payment-details">
+                  <div class="detail-row">
+                    <div class="detail-item">
+                      <span class="label">
+                        <nb-icon icon="calendar-outline"></nb-icon>
+                        Date:
+                      </span>
+                      <span class="value">{{ pay.paymentDate | date:'mediumDate' }}</span>
+                    </div>
+                    <div class="detail-item">
+                      <span class="label">
+                        <nb-icon icon="credit-card-outline"></nb-icon>
+                        Amount:
+                      </span>
+                      <span class="value amount">{{ pay.paymentAmount | currency:'INR' }}</span>
+                    </div>
+                  </div>
+                  
+                  <div class="detail-row">
+                    <div class="detail-item">
+                      <span class="label">Type:</span>
+                      <span class="value type-badge">{{ pay.paymentType }}</span>
+                    </div>
+                    <div class="detail-item">
+                      <span class="label">Mode:</span>
+                      <span class="value mode-badge">{{ pay.paymentMode }}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Payment Sections -->
+                <div class="payment-sections">
+                  <!-- Room Rents -->
+                  <div *ngIf="pay.roomRents?.length" class="payment-section">
+                    <div class="section-header" (click)="toggleSection(pay, 'roomRents')">
+                      <div class="section-title">
+                        <nb-icon icon="home-outline"></nb-icon>
+                        Room Rent Paid
+                        <span class="section-count">({{ pay.roomRents.length }})</span>
+                      </div>
+                      <nb-icon [icon]="isSectionExpanded(pay, 'roomRents') ? 'chevron-up-outline' : 'chevron-down-outline'"></nb-icon>
+                    </div>
+                    <div class="section-content" *ngIf="isSectionExpanded(pay, 'roomRents')">
+                      <div *ngFor="let r of pay.roomRents" class="section-item">
+                        <span class="item-label">{{ r.Month }} (Bill {{ r.BillNo }})</span>
+                        <span class="item-value">{{ r.Amount | currency:'INR' }}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Other Charges -->
+                  <div *ngIf="pay.otherCharges?.length" class="payment-section">
+                    <div class="section-header" (click)="toggleSection(pay, 'otherCharges')">
+                      <div class="section-title">
+                        <nb-icon icon="list-outline"></nb-icon>
+                        Other Charges
+                        <span class="section-count">({{ pay.otherCharges.length }})</span>
+                      </div>
+                      <nb-icon [icon]="isSectionExpanded(pay, 'otherCharges') ? 'chevron-up-outline' : 'chevron-down-outline'"></nb-icon>
+                    </div>
+                    <div class="section-content" *ngIf="isSectionExpanded(pay, 'otherCharges')">
+                      <div *ngFor="let c of pay.otherCharges" class="section-item">
+                        <span class="item-label">{{ c.particulars }}</span>
+                        <span class="item-value">{{ c.amount | currency:'INR' }}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Advances -->
+                  <div *ngIf="pay.advances?.length" class="payment-section">
+                    <div class="section-header" (click)="toggleSection(pay, 'advances')">
+                      <div class="section-title">
+                        <nb-icon icon="trending-up-outline"></nb-icon>
+                        Advance Paid
+                        <span class="section-count">({{ pay.advances.length }})</span>
+                      </div>
+                      <nb-icon [icon]="isSectionExpanded(pay, 'advances') ? 'chevron-up-outline' : 'chevron-down-outline'"></nb-icon>
+                    </div>
+                    <div class="section-content" *ngIf="isSectionExpanded(pay, 'advances')">
+                      <div *ngFor="let a of pay.advances" class="section-item">
+                        <span class="item-label">{{ a.createdAt | date:'mediumDate' }}</span>
+                        <span class="item-value">{{ a.amount | currency:'INR' }}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Card Actions -->
+                <div class="card-actions">
+                  <button nbButton size="small" status="primary" (click)="viewPaymentDetails(pay)" class="card-action-btn">
+                    <nb-icon icon="eye-outline"></nb-icon>
+                    View Details
+                  </button>
+                  <button nbButton size="small" status="success" (click)="exportSinglePDF(pay)" class="card-action-btn">
+                    <nb-icon icon="download-outline"></nb-icon>
+                    Export
+                  </button>
+                </div>
+              </nb-card-body>
+            </nb-card>
+          </div>
+        </div>
+
+        <!-- Pagination -->
+        <div *ngIf="payments.length > 0" class="pagination-section">
+          <div class="pagination-info">
+            Showing {{ payments.length }} of {{ totalRecords }} records
+          </div>
+          <div class="pagination-controls">
+            <button nbButton ghost size="small" [disabled]="currentPage === 1" (click)="previousPage()">
+              <nb-icon icon="chevron-left-outline"></nb-icon>
+              Previous
+            </button>
+            <span class="page-info">Page {{ currentPage }}</span>
+            <button nbButton ghost size="small" [disabled]="!hasNextPage" (click)="nextPage()">
+              Next
+              <nb-icon icon="chevron-right-outline"></nb-icon>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Loading State -->
+      <div *ngIf="isLoading" class="loading-state">
+        <div class="loading-spinner">
+          <nb-icon icon="loader-outline" class="spinning"></nb-icon>
+        </div>
+        <h5>Loading payments...</h5>
+        <p>Please wait while we fetch your data</p>
+      </div>
+
+      <!-- Empty State -->
+      <div *ngIf="!isLoading && payments.length === 0" class="empty-state">
+        <div class="empty-illustration">
+          <nb-icon icon="credit-card-outline" status="basic"></nb-icon>
+        </div>
+        <h5>No payments found</h5>
+        <p>Try adjusting your filter criteria or search parameters</p>
+        <button nbButton status="primary" (click)="resetFilters()" class="empty-action">
+          <nb-icon icon="refresh-outline"></nb-icon>
+          Reset Filters
+        </button>
+      </div>
+    </nb-card-body>
+  </nb-card>
+</div>

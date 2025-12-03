@@ -1,0 +1,401 @@
+<!-- bookings.component.html -->
+<nb-card class="booking-management-card">
+  <nb-card-header class="booking-header">
+    <div class="header-content">
+      <h4>Bookings</h4>
+      <button nbButton status="success" size="small" (click)="addBooking()">
+        <nb-icon icon="plus-outline"></nb-icon>
+        Add Booking
+      </button>
+    </div>
+  </nb-card-header>
+
+  <nb-card-body class="booking-body">
+    <!-- Search Section -->
+    <div class="search-section">
+      <div class="search-input-group">
+        <input 
+          nbInput 
+          fullWidth 
+          placeholder="Search by student, room, period, status..." 
+          [(ngModel)]="searchQuery"
+          (keyup.enter)="search()"
+          class="search-input">
+        <button nbButton status="primary" size="small" (click)="search()" class="search-btn">
+          <nb-icon icon="search-outline"></nb-icon>
+          Search
+        </button>
+        <button nbButton status="basic" size="small" (click)="clearSearch()" class="reset-btn">
+          <nb-icon icon="refresh-outline"></nb-icon>
+          Reset
+        </button>
+      </div>
+    </div>
+
+    <!-- Desktop Table -->
+    <div class="table-container desktop-view">
+      <table class="bookings-table">
+        <thead>
+          <tr>
+            <th>Student</th>
+            <th>Room</th>
+            <th>Tariff</th>
+            <th>Start Date</th>
+            <th>End Date</th>
+            <th>Amount</th>
+            <th>Status</th>
+            <th>Vocation Date</th>
+            <th>Vocation Reason</th>
+            <th class="actions-header">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let b of filteredBookings">
+            <td>
+              <div class="student-info">
+                <nb-icon icon="person-outline" status="info"></nb-icon>
+                {{ getStudentName(b.studentId) }}
+              </div>
+            </td>
+            <td>
+              <div class="room-info">
+                <nb-icon icon="home-outline" status="primary"></nb-icon>
+                {{ getRoomNumber(b.roomId) }}
+              </div>
+            </td>
+            <td>{{ b.tariffPeriod }}</td>
+            <td>{{ b.startDate | date:'mediumDate' }}</td>
+            <td>{{ b.endDate | date:'mediumDate' }}</td>
+            <td>
+              <div class="amount-badge">
+                ₹{{ b.amount }}
+              </div>
+            </td>
+            <td>
+              <div class="status-badge" [class]="'status-' + b.status?.toLowerCase()">
+                {{ b.status }}
+              </div>
+            </td>
+            <td>
+              <div class="vocation-date">
+                {{ b.vocationDate ? (b.vocationDate | date:'mediumDate') : '-' }}
+              </div>
+            </td>
+            <td>
+              <div class="vocation-reason" [title]="b.vocationReason || 'No reason provided'">
+                {{ (b.vocationReason | slice:0:20) || '-' }}{{ b.vocationReason && b.vocationReason.length > 20 ? '...' : '' }}
+              </div>
+            </td>
+            <td class="actions-cell">
+              <div class="action-buttons">
+                <button 
+                  nbButton 
+                  status="primary" 
+                  size="tiny" 
+                  (click)="editBooking(b)" 
+                  *ngIf="b.status != 'Cancelled'"
+                  class="action-btn">
+                  <nb-icon icon="edit-2-outline"></nb-icon>
+                  <span class="btn-text">Edit</span>
+                </button>
+                <button 
+                  nbButton 
+                  status="warning" 
+                  size="tiny" 
+                  (click)="openVocationModal(b)" 
+                  *ngIf="b.status != 'Cancelled'"
+                  class="action-btn">
+                  <nb-icon icon="calendar-outline"></nb-icon>
+                  <span class="btn-text">Vocate</span>
+                </button>
+                <button 
+                  nbButton 
+                  status="danger" 
+                  size="tiny" 
+                  (click)="deleteBooking(b)" 
+                  *ngIf="b.status != 'Cancelled'"
+                  class="action-btn">
+                  <nb-icon icon="close-outline"></nb-icon>
+                  <span class="btn-text">Cancel</span>
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Mobile Cards -->
+    <div class="mobile-view">
+      <nb-card *ngFor="let b of filteredBookings" class="booking-card">
+        <nb-card-body>
+          <div class="booking-card-header">
+            <div class="booking-title">
+              <nb-icon icon="calendar-outline" status="primary"></nb-icon>
+              <div class="title-content">
+                <h5>{{ getStudentName(b.studentId) }}</h5>
+                <span class="room-number">{{ getRoomNumber(b.roomId) }}</span>
+              </div>
+            </div>
+            <div class="booking-status">
+              <div class="status-badge" [class]="'status-' + b.status?.toLowerCase()">
+                {{ b.status }}
+              </div>
+            </div>
+          </div>
+          
+          <div class="booking-details">
+            <div class="detail-row">
+              <div class="detail-item">
+                <span class="label">Tariff Period:</span>
+                <span class="value">{{ b.tariffPeriod }}</span>
+              </div>
+              <div class="detail-item">
+                <span class="label">Amount:</span>
+                <span class="value amount">₹{{ b.amount }}</span>
+              </div>
+            </div>
+            
+            <div class="detail-row">
+              <div class="detail-item">
+                <span class="label">Start Date:</span>
+                <span class="value">{{ b.startDate | date:'mediumDate' }}</span>
+              </div>
+              <div class="detail-item">
+                <span class="label">End Date:</span>
+                <span class="value">{{ b.endDate | date:'mediumDate' }}</span>
+              </div>
+            </div>
+
+            <div class="detail-item full-width" *ngIf="b.vocationDate">
+              <span class="label">Vocation Date:</span>
+              <span class="value">{{ b.vocationDate | date:'mediumDate' }}</span>
+            </div>
+
+            <div class="detail-item full-width" *ngIf="b.vocationReason">
+              <span class="label">Vocation Reason:</span>
+              <span class="value">{{ b.vocationReason }}</span>
+            </div>
+          </div>
+
+          <div class="card-actions" *ngIf="b.status != 'Cancelled'">
+            <button 
+              nbButton 
+              status="primary" 
+              size="small" 
+              (click)="editBooking(b)"
+              class="action-btn">
+              <nb-icon icon="edit-2-outline"></nb-icon>
+              Edit
+            </button>
+            <button 
+              nbButton 
+              status="warning" 
+              size="small" 
+              (click)="openVocationModal(b)"
+              class="action-btn">
+              <nb-icon icon="calendar-outline"></nb-icon>
+              Vocate
+            </button>
+            <button 
+              nbButton 
+              status="danger" 
+              size="small" 
+              (click)="deleteBooking(b)"
+              class="action-btn">
+              <nb-icon icon="close-outline"></nb-icon>
+              Cancel
+            </button>
+          </div>
+        </nb-card-body>
+      </nb-card>
+    </div>
+
+    <!-- Empty State -->
+    <div *ngIf="filteredBookings.length === 0" class="empty-state">
+      <nb-icon icon="calendar-outline" status="basic" class="empty-icon"></nb-icon>
+      <h4>No bookings found</h4>
+      <p *ngIf="searchQuery">Try adjusting your search criteria</p>
+      <button 
+        nbButton 
+        status="primary" 
+        (click)="addBooking()"
+        *ngIf="bookings.length === 0">
+        Create Your First Booking
+      </button>
+    </div>
+  </nb-card-body>
+</nb-card>
+
+<!-- Alternative Vocation Modal without Dialog Service -->
+<div class="modal-backdrop" *ngIf="showVocationModal" (click)="closeVocationModal()"></div>
+
+<div class="modern-vocation-modal-container" *ngIf="showVocationModal">
+  <nb-card class="modern-vocation-modal">
+    <nb-card-header class="modal-header">
+      <div class="header-content">
+        <nb-icon icon="calendar-outline" class="header-icon"></nb-icon>
+        <h5 class="modal-title">Update Vocation Details</h5>
+      </div>
+      <button nbButton ghost size="small" (click)="closeVocationModal()" class="close-btn">
+        <nb-icon icon="close-outline"></nb-icon>
+      </button>
+    </nb-card-header>
+
+    <nb-card-body class="modal-body">
+      <!-- Student Info -->
+      <div class="student-card">
+        <div class="student-avatar">
+          <nb-icon icon="person-outline" status="primary"></nb-icon>
+        </div>
+        <div class="student-details">
+          <h6>{{ getStudentName(selectedBooking?.studentId) }}</h6>
+          <span class="room-info">
+            <nb-icon icon="home-outline" class="icon-sm"></nb-icon>
+            Room {{ getRoomNumber(selectedBooking?.roomId) }}
+          </span>
+        </div>
+      </div>
+
+      <!-- Vocation Type Selection -->
+      <div class="form-section">
+        <label class="section-label">Vocation Type</label>
+        <div class="vocation-type-selector">
+          <div class="type-option" 
+               [class.selected]="selectedVocationType === 'Temporary'"
+               (click)="selectedVocationType = 'Temporary'">
+            <div class="option-content">
+              <nb-icon icon="clock-outline" class="option-icon"></nb-icon>
+              <div class="option-text">
+                <span class="option-title">Temporary</span>
+                <span class="option-description">Student will return after vocation</span>
+              </div>
+            </div>
+            <div class="selection-indicator">
+              <div class="indicator" *ngIf="selectedVocationType === 'Temporary'"></div>
+            </div>
+          </div>
+
+          <div class="type-option" 
+               [class.selected]="selectedVocationType === 'Permanent'"
+               (click)="selectedVocationType = 'Permanent'">
+            <div class="option-content">
+              <nb-icon icon="power-outline" class="option-icon"></nb-icon>
+              <div class="option-text">
+                <span class="option-title">Permanent</span>
+                <span class="option-description">Student is leaving permanently</span>
+              </div>
+            </div>
+            <div class="selection-indicator">
+              <div class="indicator" *ngIf="selectedVocationType === 'Permanent'"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Vocation Date -->
+      <div class="form-section">
+        <label class="section-label" for="vocationDate">Vocation Date</label>
+        <input 
+          nbInput 
+          fullWidth 
+          id="vocationDate"
+          type="date" 
+          [(ngModel)]="vocationDate"
+          [min]="minDate"
+          class="modern-date-input">
+        <div class="date-hint">
+          <nb-icon icon="info-outline" class="hint-icon"></nb-icon>
+          <span>Select when the student will leave</span>
+        </div>
+      </div>
+
+      <!-- Vocation Reason -->
+      <div class="form-section">
+        <label class="section-label" for="vocationReason">Vocation Reason</label>
+        <textarea 
+          nbInput 
+          fullWidth 
+          id="vocationReason"
+          rows="3"
+          placeholder="Enter reason for vocation (e.g., holiday, personal reasons, etc.)"
+          [(ngModel)]="vocationReason"
+          class="reason-textarea">
+        </textarea>
+        <div class="char-counter" *ngIf="vocationReason">
+          {{ vocationReason.length }}/200 characters
+        </div>
+      </div>
+
+      <!-- Additional Notes (for temporary vocation) -->
+      <div class="form-section" *ngIf="selectedVocationType === 'Temporary'">
+        <label class="section-label" for="returnDate">Expected Return Date</label>
+        <input 
+          nbInput 
+          fullWidth 
+          id="returnDate"
+          type="date" 
+          [(ngModel)]="returnDate"
+          [min]="vocationDate"
+          class="modern-date-input">
+        <div class="date-hint">
+          <nb-icon icon="info-outline" class="hint-icon"></nb-icon>
+          <span>Select when the student is expected to return</span>
+        </div>
+      </div>
+
+      <!-- Confirmation Message for Permanent -->
+      <div class="warning-card" *ngIf="selectedVocationType === 'Permanent'">
+        <div class="warning-header">
+          <nb-icon icon="alert-triangle-outline" status="warning"></nb-icon>
+          <span>Permanent Vocation</span>
+        </div>
+        <p class="warning-text">
+          This will mark the booking as completed and the room will be made available for new bookings.
+        </p>
+      </div>
+
+        <!-- Add this section after the Expected Return Date section -->
+      <div class="form-section" *ngIf="selectedVocationType === 'Temporary'">
+        <label class="section-label" for="temporaryAmount">Temporary Vocation Amount</label>
+        <input 
+          nbInput 
+          fullWidth 
+          id="temporaryAmount"
+          type="number" 
+          placeholder="Enter amount for temporary vocation period"
+          [(ngModel)]="temporaryAmount"
+          min="0"
+          step="0.01"
+          class="modern-date-input">
+        <div class="date-hint">
+          <nb-icon icon="info-outline" class="hint-icon"></nb-icon>
+          <span>Enter the applicable amount for the temporary vocation period</span>
+        </div>
+      </div>
+
+
+    </nb-card-body>
+
+    <nb-card-footer class="modal-footer">
+      <div class="footer-actions">
+        <button 
+          nbButton 
+          status="basic" 
+          (click)="closeVocationModal()" 
+          class="action-btn">
+          Cancel
+        </button>
+        <button 
+          nbButton 
+          status="primary" 
+          (click)="saveVocation()"
+          [disabled]="!vocationDate || !selectedVocationType"
+          class="action-btn save-btn">
+          <nb-icon icon="checkmark-outline"></nb-icon>
+          Confirm Vocation
+        </button>
+      </div>
+    </nb-card-footer>
+  </nb-card>
+</div>

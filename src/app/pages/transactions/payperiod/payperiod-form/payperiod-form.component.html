@@ -1,0 +1,38 @@
+<nb-card>
+    <nb-card-header>Pay Period</nb-card-header>
+    <nb-card-body>
+      <form [formGroup]="form" (ngSubmit)="onSubmit()">
+        <div class="form-group">
+          <label>Payable Category ID</label>
+          <input nbInput formControlName="payableCategoryId" />
+        </div>
+  
+        <div class="form-group">
+          <label>Attendance From</label>
+          <input nbInput type="date" formControlName="attendanceFrom" />
+        </div>
+  
+        <div class="form-group">
+          <label>Attendance To</label>
+          <input nbInput type="date" formControlName="attendanceTo" />
+        </div>
+  
+        <div class="form-group">
+          <label>Pay Date</label>
+          <input nbInput type="date" formControlName="payDate" />
+        </div>
+  
+        <div class="form-group">
+          <label>Status</label>
+          <nb-select formControlName="status">
+            <nb-option value="Active">Active</nb-option>
+            <nb-option value="Confirmed">Confirmed</nb-option>
+          </nb-select>
+        </div>
+  
+        <button nbButton status="success" type="submit" [disabled]="form.invalid">
+          {{ isEdit ? 'Update' : 'Create' }}
+        </button>
+      </form>
+    </nb-card-body>
+  </nb-card>

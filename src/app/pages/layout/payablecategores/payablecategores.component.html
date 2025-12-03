@@ -1,0 +1,90 @@
+<nb-card>
+    <nb-card-header class="text-primary font-weight-bold">
+      Create Payable Category
+    </nb-card-header>
+  
+    <nb-card-body>
+      <form [formGroup]="payableForm" (ngSubmit)="onSubmit()" class="form-layout">
+  
+        <!-- Category Name -->
+        <div class="form-group">
+          <label>Category Name</label>
+          <input nbInput fullWidth formControlName="categoryName" placeholder="e.g. Executive" />
+        </div>
+  
+        <!-- Payable Type -->
+        <div class="form-group">
+          <label>Payable Type</label>
+          <div class="type-selector">
+            <button
+              nbButton
+              *ngFor="let type of payableTypes"
+              outline
+              shape="round"
+              size="medium"
+              class="pay-type-btn"
+              [status]="payableForm.get('payableType')?.value === type ? 'primary' : 'basic'"
+              (click)="payableForm.get('payableType')?.setValue(type)"
+              type="button"
+            >
+              {{ type }}
+            </button>
+          </div>
+        </div>
+  
+        <!-- Fixed Days Input -->
+        <div class="form-group" *ngIf="payableForm.get('payableType')?.value === 'Fixed Days'">
+          <label>Number of Fixed Days</label>
+          <input nbInput fullWidth type="number" formControlName="fixedDays" placeholder="e.g. 10" />
+        </div>
+  
+        <!-- Submit Button -->
+        <div class="form-actions mt-4">
+          <button nbButton status="success" shape="round" [disabled]="isSubmitting" type="submit">
+            {{ isSubmitting ? 'Saving...' : 'Save' }}
+          </button>
+  
+          <span class="text-success ml-3" *ngIf="successMessage">{{ successMessage }}</span>
+          <span class="text-danger ml-3" *ngIf="errorMessage">{{ errorMessage }}</span>
+        </div>
+  
+      </form>
+
+      <hr class="my-4" />
+<h5 class="mb-3">Saved Payable Categories</h5>
+
+<nb-card>
+  <nb-card-body *ngIf="payableList.length > 0; else noData">
+    <table class="table table-hover table-bordered table-sm">
+      <thead class="thead-light">
+        <tr>
+          <th>Category</th>
+          <th>Type</th>
+          <th>Fixed Days</th>
+          <th style="width: 80px;"></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let cat of payableList">
+          <td>{{ cat.categoryName }}</td>
+          <td>{{ cat.payableType }}</td>
+          <td>{{ cat.fixedDays || '-' }}</td>
+          <td>
+            <button nbButton size="tiny" status="info" (click)="editCategory(cat)">Edit</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </nb-card-body>
+</nb-card>
+
+<ng-template #noData>
+  <div class="text-muted small">No payable categories found.</div>
+</ng-template>
+
+
+
+
+    </nb-card-body>
+  </nb-card>
+  

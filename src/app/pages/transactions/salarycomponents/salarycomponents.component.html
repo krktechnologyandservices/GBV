@@ -1,0 +1,73 @@
+<nb-card>
+    <nb-card-header>Employee Pay Component</nb-card-header>
+    <nb-card-body>
+      <form [formGroup]="form" (ngSubmit)="submit()">
+  
+        <!-- Employee Code Auto-Complete -->
+        <input nbInput fullWidth placeholder="Type Employee Code"
+               [nbAutocomplete]="empAuto"
+               formControlName="employeeCode"
+               (input)="onSearchEmployee($event.target.value)" />
+  
+        <nb-autocomplete #empAuto (selectedChange)="onEmployeeSelect($event)">
+          <nb-option *ngFor="let emp of filteredEmployees" [value]="emp.EmployeeCode">
+            {{ emp.EmployeeCode }} - {{ emp.EmployeeName }}
+          </nb-option>
+        </nb-autocomplete>
+  
+        <!-- Component Type -->
+        <nb-select formControlName="componentType" (selectedChange)="onComponentTypeChange($event)">
+          <nb-option value="Fixed">Fixed</nb-option>
+          <nb-option value="Variable">Variable</nb-option>
+        </nb-select>
+  
+        <!-- Component Auto-Complete -->
+        <input nbInput fullWidth placeholder="Search Component"
+               [nbAutocomplete]="compAuto"
+               formControlName="componentName" />
+  
+        <nb-autocomplete #compAuto (selectedChange)="onComponentSelect($event)">
+          <nb-option *ngFor="let comp of filteredComponents" [value]="comp.ComponentName">
+            {{ comp.ComponentName }}
+          </nb-option>
+        </nb-autocomplete>
+  
+        <!-- Amount -->
+        <input nbInput placeholder="Enter amount" type="number" formControlName="amount">
+  
+        <!-- Variable Fields -->
+        <nb-select *ngIf="form.value.componentType === 'Variable'" formControlName="payPeriodId">
+          <nb-option *ngFor="let p of payPeriods" [value]="p.id">{{ p.payDate }}</nb-option>
+        </nb-select>
+  
+        <!-- Fixed Fields -->
+        <input *ngIf="form.value.componentType === 'Fixed'" nbInput type="date" formControlName="fromDate" placeholder="From Date">
+        <input *ngIf="form.value.componentType === 'Fixed'" nbInput type="date" formControlName="toDate" placeholder="To Date">
+  
+        <button nbButton status="primary">{{ editId ? 'Update' : 'Save' }}</button>
+      </form>
+  
+      <hr />
+  
+      <!-- Pay Component List -->
+      <table class="table">
+        <thead>
+          <tr><th>Component</th><th>Amount</th><th>Period</th><th>From</th><th>To</th><th>Actions</th></tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of componentList">
+            <td>{{ item.ComponentName }}</td>
+            <td>{{ item.Amount }}</td>
+            <td>{{ item.payPeriodLabel || '-' }}</td>
+            <td>{{ item.FromDate | date }}</td>
+            <td>{{ item.ToDate | date }}</td>
+            <td>
+              <button nbButton size="tiny" (click)="edit(item)">Edit</button>
+              <button nbButton size="tiny" status="danger" (click)="delete(item.Id)">Delete</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </nb-card-body>
+  </nb-card>
+  

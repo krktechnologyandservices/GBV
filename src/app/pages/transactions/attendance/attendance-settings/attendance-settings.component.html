@@ -1,0 +1,20 @@
+<nb-card size="large">
+    <nb-card-header>Settings</nb-card-header>
+  
+    <nb-card-body>
+      <button nbButton status="basic" size="small" (click)="onCancel()">
+        <nb-icon icon="arrow-back"></nb-icon> Back
+      </button>
+      <nb-tabset>
+        <nb-tab tabTitle="Grace Periods">
+          <app-grace-periods></app-grace-periods>
+        </nb-tab>
+        <nb-tab tabTitle="Work Hours">
+          <app-work-hours></app-work-hours>
+        </nb-tab>
+        <nb-tab tabTitle="Attendance Reasons">
+          <app-attendance-reasons></app-attendance-reasons>
+        </nb-tab>
+      </nb-tabset>
+    </nb-card-body>
+  </nb-card>

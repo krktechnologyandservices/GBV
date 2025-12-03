@@ -1,0 +1,187 @@
+<!-- rooms.component.html -->
+<nb-card class="room-management-card">
+  <nb-card-header class="room-header">
+    <div class="header-content">
+      <h4>Rooms</h4>
+      <button nbButton status="success" size="small" (click)="router.navigate(['pages/master/rooms/add'])">
+        <nb-icon icon="plus-outline"></nb-icon>
+        Add Room
+      </button>
+    </div>
+  </nb-card-header>
+
+  <nb-card-body class="room-body">
+    <!-- Search Section -->
+    <div class="search-section">
+      <div class="search-input-group">
+        <input 
+          nbInput 
+          fullWidth 
+          placeholder="Search by room number or tariff..." 
+          [(ngModel)]="searchQuery"
+          (keyup.enter)="search()"
+          class="search-input">
+        <button nbButton status="primary" size="small" (click)="search()" class="search-btn">
+          <nb-icon icon="search-outline"></nb-icon>
+          Search
+        </button>
+        <button nbButton status="basic" size="small" (click)="clearSearch()" class="reset-btn">
+          <nb-icon icon="refresh-outline"></nb-icon>
+          Reset
+        </button>
+      </div>
+    </div>
+
+    <!-- Desktop Table -->
+    <div class="table-container desktop-view">
+      <table class="rooms-table">
+        <thead>
+          <tr>
+            <th>Room Number</th>
+            <th>Capacity</th>
+            <th>Occupied</th>
+            <th>Tariffs</th>
+            <th class="actions-header">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let room of filteredRooms">
+            <td>
+              <div class="room-number">
+                <nb-icon icon="home-outline" status="primary"></nb-icon>
+                {{room.roomNumber}}
+              </div>
+            </td>
+            <td>
+              <div class="capacity-badge">
+                <div class="custom-badge" [class]="'badge-' + room.capacity">
+                  {{room.capacity}}
+                </div>
+              </div>
+            </td>
+            <td>
+              <div class="occupancy-status">
+                <div class="custom-badge" [class]="room.occupiedCount > 0 ? 'badge-occupied' : 'badge-available'">
+                  {{room.occupiedCount}}
+                </div>
+              </div>
+            </td>
+            <td>
+              <div class="tariffs-list">
+                <div *ngFor="let t of room.tariffs" class="tariff-item">
+                  <span class="period">{{t.period}}</span>
+                  <span class="rate">₹{{t.rate}}</span>
+                </div>
+              </div>
+            </td>
+            <td class="actions-cell">
+              <div class="action-buttons">
+                <button 
+                  nbButton 
+                  status="primary" 
+                  size="tiny" 
+                  (click)="edit(room.id!)"
+                  class="action-btn">
+                  <nb-icon icon="edit-2-outline"></nb-icon>
+                  <span class="btn-text">Edit</span>
+                </button>
+                <button 
+                  nbButton 
+                  status="danger" 
+                  size="tiny" 
+                  (click)="delete(room.id!)"
+                  class="action-btn">
+                  <nb-icon icon="trash-2-outline"></nb-icon>
+                  <span class="btn-text">Delete</span>
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Mobile Cards -->
+    <div class="mobile-view">
+      <nb-card *ngFor="let room of filteredRooms" class="room-card">
+        <nb-card-body>
+          <div class="room-card-header">
+            <div class="room-title">
+              <nb-icon icon="home-outline" status="primary"></nb-icon>
+              <h5>{{room.roomNumber}}</h5>
+            </div>
+            <div class="room-status">
+              <div class="custom-badge" [class]="room.occupiedCount > 0 ? 'badge-occupied' : 'badge-available'">
+                {{room.occupiedCount}}/{{room.capacity}}
+              </div>
+            </div>
+          </div>
+          
+          <div class="room-details">
+            <div class="detail-item">
+              <span class="label">Capacity:</span>
+              <span class="value">
+                <div class="custom-badge badge-capacity">
+                  {{room.capacity}}
+                </div>
+              </span>
+            </div>
+            <div class="detail-item">
+              <span class="label">Occupied:</span>
+              <span class="value">
+                <div class="custom-badge" [class]="room.occupiedCount > 0 ? 'badge-occupied' : 'badge-available'">
+                  {{room.occupiedCount}}
+                </div>
+              </span>
+            </div>
+          </div>
+
+          <div class="tariffs-section">
+            <h6>Tariffs</h6>
+            <div class="tariffs-list">
+              <div *ngFor="let t of room.tariffs" class="tariff-item">
+                <span class="period">{{t.period}}</span>
+                <span class="rate">₹{{t.rate}}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="card-actions">
+            <button 
+              nbButton 
+              status="primary" 
+              size="small" 
+              (click)="edit(room.id!)"
+              class="action-btn">
+              <nb-icon icon="edit-2-outline"></nb-icon>
+              Edit
+            </button>
+            <button 
+              nbButton 
+              status="danger" 
+              size="small" 
+              (click)="delete(room.id!)"
+              class="action-btn">
+              <nb-icon icon="trash-2-outline"></nb-icon>
+              Delete
+            </button>
+          </div>
+        </nb-card-body>
+      </nb-card>
+    </div>
+
+    <!-- Empty State -->
+    <div *ngIf="filteredRooms.length === 0" class="empty-state">
+      <nb-icon icon="grid-outline" status="basic" class="empty-icon"></nb-icon>
+      <h4>No rooms found</h4>
+      <p *ngIf="searchQuery">Try adjusting your search criteria</p>
+      <button 
+        nbButton 
+        status="primary" 
+        (click)="router.navigate(['pages/master/rooms/add'])"
+        *ngIf="rooms.length === 0">
+        Add Your First Room
+      </button>
+    </div>
+  </nb-card-body>
+</nb-card>

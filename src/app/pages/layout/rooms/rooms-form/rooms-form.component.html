@@ -1,0 +1,34 @@
+<nb-card>
+    <nb-card-header>{{ isEdit ? 'Edit Room' : 'Add Room' }}</nb-card-header>
+    <nb-card-body>
+      <form [formGroup]="roomForm" (ngSubmit)="save()">
+  
+        <div class="form-group">
+          <label>Room Number</label>
+          <input nbInput fullWidth formControlName="roomNumber">
+        </div>
+  
+        <div class="form-group">
+          <label>Capacity</label>
+          <input nbInput type="number" fullWidth formControlName="capacity">
+        </div>
+  
+        <div class="form-group">
+          <label>Tariffs</label>
+          <div formArrayName="tariffs">
+            <div *ngFor="let tariff of tariffs.controls; let i = index" [formGroupName]="i" style="margin-bottom:10px;">
+              <label>{{tariff.value.period}} Rate</label>
+              <input nbInput type="number" formControlName="rate" placeholder="Enter rate for {{tariff.value.period}}">
+            </div>
+          </div>
+        </div>
+  
+        <div style="margin-top:15px;">
+          <button nbButton status="primary" type="submit">{{ isEdit ? 'Update' : 'Add' }}</button>
+          <button nbButton status="danger" type="button" (click)="cancel()">Cancel</button>
+        </div>
+  
+      </form>
+    </nb-card-body>
+  </nb-card>
+  

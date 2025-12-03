@@ -1,0 +1,25 @@
+.payslip-card {
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.nb-card-header {
+  font-size: 1.1rem;
+  font-weight: bold;
+}
+
+.table th, .table td {
+  vertical-align: middle;
+}
+
+@media (max-width: 576px) {
+  .employee-info div {
+    margin-bottom: 6px;
+  }
+
+  .nb-card-header {
+    flex-direction: column;
+    gap: 10px;
+    text-align: center;
+  }
+}

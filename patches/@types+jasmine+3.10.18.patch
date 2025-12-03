@@ -1,0 +1,13 @@
+diff --git a/node_modules/@types/jasmine/index.d.ts b/node_modules/@types/jasmine/index.d.ts
+index 7c0e3b6..7c6c257 100644
+--- a/node_modules/@types/jasmine/index.d.ts
++++ b/node_modules/@types/jasmine/index.d.ts
+@@ -833,7 +833,7 @@ declare namespace jasmine {
+ 
+     type MatchableArgs<Fn> = Fn extends (...args: infer P) => any ? { [K in keyof P]: Expected<P[K]> } : never;
+ 
+-    interface FunctionMatchers<Fn extends Func> extends Matchers<any> {
++    interface FunctionMatchers<Fn extends Func>  {
+         /**
+          * Expects the actual (a spy) to have been called with the particular arguments at least once
+          * @param params The arguments to look for

@@ -1,0 +1,47 @@
+<nb-card>
+  <nb-card-header>Employees</nb-card-header>
+  <nb-card-body>
+
+    <div class="search-container" style="margin-bottom: 1rem;">
+      <input nbInput fullWidth placeholder="Search by Code, Name, or Email"
+             [(ngModel)]="searchTerm"
+             (ngModelChange)="onSearchChange($event)" />
+    </div>
+
+    <div class="button-group" style="margin-bottom: 1rem;">
+      <button nbButton status="primary" (click)="refresh()">Refresh Employees</button>
+      <button nbButton status="success" routerLink="/pages/master/createmployee">Add Employee</button>
+    </div>
+
+    <div class="table-scroll-top" #scrollTop (scroll)="syncScroll($event)">
+      <div style="width: 1500px;"></div> <!-- Must be wide enough to cover table content -->
+    </div>
+
+    <div class="table-wrapper" #tableWrapper (scroll)="syncScroll($event)">
+      <table class="table table-bordered table-hover">
+        <thead>
+          <tr>
+            <th>Code</th>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Active</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let emp of filteredEmployees; trackBy: trackByEmployeeId">
+            <td>{{ emp.employeeCode }}</td>
+            <td>{{ emp.firstName }} {{ emp.lastName }}</td>
+            <td>{{ emp.emailId }}</td>
+            <td>{{ emp.activeStatus ? 'Yes' : 'No' }}</td>
+            <td>
+              <button nbButton size="tiny" status="info" [routerLink]="['/pages/master/editemployee', emp.employeeId]">Edit</button>
+              <button nbButton size="tiny" status="danger" (click)="delete(emp.employeeId)">Delete</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </nb-card-body>
+</nb-card>

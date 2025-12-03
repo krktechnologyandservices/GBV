@@ -1,0 +1,66 @@
+/* General Table Styling */
+.daybook-table table {
+    border-collapse: separate;
+    border-spacing: 0;
+    width: 100%;
+    font-size: 0.9rem;
+  }
+  
+  .daybook-table th {
+    background-color: #343a40; /* Dark header */
+    color: #fff;
+    text-align: center;
+    padding: 10px;
+    font-weight: 600;
+  }
+  
+  .daybook-table td {
+    padding: 10px;
+    border-bottom: 1px solid #dee2e6;
+    vertical-align: middle;
+  }
+  
+  /* Right align debit/credit */
+  .daybook-table td.text-end { text-align: right; }
+  
+  /* Hover effect */
+  .daybook-table tbody tr:hover {
+    background-color: #f1f3f5;
+  }
+  
+  /* Special Entry Highlighting */
+  .opening-balance { background-color: #d0ebff !important; font-weight: bold; }
+  .period-total { background-color: #fff3bf !important; font-weight: bold; }
+  .closing-balance { background-color: #d3f9d8 !important; font-weight: bold; }
+  
+  /* Alternating row colors for transactions */
+  .daybook-table tbody tr:nth-child(odd):not(.opening-balance):not(.period-total):not(.closing-balance) {
+    background-color: #f8f9fa;
+  }
+  
+  .daybook-table tbody tr:nth-child(even):not(.opening-balance):not(.period-total):not(.closing-balance) {
+    background-color: #ffffff;
+  }
+  
+  /* Left border emphasis for special entries */
+  .opening-balance td, .period-total td, .closing-balance td {
+    border-left: 5px solid;
+  }
+  
+  .opening-balance td { border-left-color: #1c7ed6; }
+  .period-total td { border-left-color: #f59f00; }
+  .closing-balance td { border-left-color: #40c057; }
+  
+  /* Color-code Debit / Credit */
+  .daybook-table td.debit { color: #2b8a3e; font-weight: 600; }   /* green for debit */
+  .daybook-table td.credit { color: #c92a2a; font-weight: 600; }  /* red for credit */
+  
+  /* Optional: subtle shadow on hover for depth */
+  .daybook-table tbody tr {
+    transition: box-shadow 0.2s;
+  }
+  
+  .daybook-table tbody tr:hover {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  }
+  

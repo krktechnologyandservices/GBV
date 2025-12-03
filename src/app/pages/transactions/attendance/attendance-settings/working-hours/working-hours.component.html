@@ -1,0 +1,86 @@
+<nb-card>
+    <nb-card-header>Work Hours</nb-card-header>
+    <nb-card-body>
+      <form [formGroup]="form" (ngSubmit)="save()">
+        <div class="form-grid">
+          <nb-form-field>
+            <label for="department">Department</label>
+            <input nbInput formControlName="department" id="department" />
+            <nb-form-field-error *ngIf="form.get('department')?.invalid && form.get('department')?.touched">
+              Department is required
+            </nb-form-field-error>
+          </nb-form-field>
+  
+          <nb-form-field>
+            <label for="morningStart">Morning Start</label>
+            <input nbInput type="time" formControlName="morningStart" id="morningStart" />
+            <nb-form-field-error *ngIf="form.get('morningStart')?.invalid && form.get('morningStart')?.touched">
+              Required
+            </nb-form-field-error>
+          </nb-form-field>
+  
+          <nb-form-field>
+            <label for="morningEnd">Morning End</label>
+            <input nbInput type="time" formControlName="morningEnd" id="morningEnd" />
+            <nb-form-field-error *ngIf="form.get('morningEnd')?.invalid && form.get('morningEnd')?.touched">
+              Required
+            </nb-form-field-error>
+          </nb-form-field>
+  
+          <nb-form-field>
+            <label for="afternoonStart">Afternoon Start</label>
+            <input nbInput type="time" formControlName="afternoonStart" id="afternoonStart" />
+            <nb-form-field-error *ngIf="form.get('afternoonStart')?.invalid && form.get('afternoonStart')?.touched">
+              Required
+            </nb-form-field-error>
+          </nb-form-field>
+  
+          <nb-form-field>
+            <label for="afternoonEnd">Afternoon End</label>
+            <input nbInput type="time" formControlName="afternoonEnd" id="afternoonEnd" />
+            <nb-form-field-error *ngIf="form.get('afternoonEnd')?.invalid && form.get('afternoonEnd')?.touched">
+              Required
+            </nb-form-field-error>
+          </nb-form-field>
+  
+          <div class="buttons">
+            <button nbButton status="success" type="submit" [disabled]="form.invalid">
+              {{ isEdit ? 'Update' : 'Add' }}
+            </button>
+            <button nbButton status="danger" type="button" (click)="cancel()" *ngIf="isEdit">Cancel</button>
+          </div>
+        </div>
+      </form>
+  
+      <nb-spinner *ngIf="loading" size="small"></nb-spinner>
+  
+      <table class="table table-striped" *ngIf="!loading && workHoursList.length">
+        <thead>
+          <tr>
+            <th>Department</th>
+            <th>Morning Start</th>
+            <th>Morning End</th>
+            <th>Afternoon Start</th>
+            <th>Afternoon End</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let wh of workHoursList">
+            <td>{{ wh.department }}</td>
+            <td>{{ wh.morningStart }}</td>
+            <td>{{ wh.morningEnd }}</td>
+            <td>{{ wh.afternoonStart }}</td>
+            <td>{{ wh.afternoonEnd }}</td>
+            <td>
+              <button nbButton size="tiny" status="info" (click)="edit(wh)">Edit</button>
+              <button nbButton size="tiny" status="danger" (click)="delete(wh.id)">Delete</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+  
+      <p *ngIf="!loading && !workHoursList.length">No work hours found.</p>
+    </nb-card-body>
+  </nb-card>
+  

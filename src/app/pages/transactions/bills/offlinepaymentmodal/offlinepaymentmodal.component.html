@@ -1,0 +1,18 @@
+<nb-card>
+    <nb-card-header>Upload Payment Details</nb-card-header>
+    <nb-card-body [formGroup]="paymentForm">
+      <!-- Amount (readonly) -->
+      <input nbInput fullWidth placeholder="Amount" formControlName="amount" readonly />
+  
+      <nb-select fullWidth placeholder="Payment Mode" formControlName="paymentMode">
+        <nb-option *ngFor="let mode of paymentModes" [value]="mode">{{ mode }}</nb-option>
+      </nb-select>
+  
+      <input nbInput fullWidth placeholder="Reference / Transaction Number" formControlName="referenceNumber" />
+      <input nbInput fullWidth type="date" formControlName="paymentDate" />
+      <input type="file" (change)="onFileSelected($event)" />
+  
+      <button nbButton status="success" (click)="submit()">Save</button>
+    </nb-card-body>
+  </nb-card>
+  

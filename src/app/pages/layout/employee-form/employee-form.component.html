@@ -1,0 +1,211 @@
+<nb-card>
+    <nb-card-header>{{ isEditMode ? 'Edit Employee' : 'Add Employee' }}</nb-card-header>
+    <nb-card-body>
+      <form [formGroup]="employeeForm" (ngSubmit)="save()">
+        <nb-tabset>
+          <nb-tab tabTitle="Basic Info">
+            <div class="responsive-row">
+              <div class="form-group flex-half">
+                <label>Employee Code *</label>
+                <input nbInput fullWidth formControlName="employeeCode" placeholder="Employee Code" />
+              </div>
+              <div class="form-group flex-half">
+                <label>First Name *</label>
+                <input nbInput fullWidth formControlName="firstName" placeholder="First Name" />
+              </div>
+            </div>
+            <div class="responsive-row">
+              <div class="form-group flex-half">
+                <label>Middle Name</label>
+                <input nbInput fullWidth formControlName="middleName" placeholder="Middle Name" />
+              </div>
+              <div class="form-group flex-half">
+                <label>Last Name *</label>
+                <input nbInput fullWidth formControlName="lastName" placeholder="Last Name" />
+              </div>
+            </div>
+            <div class="responsive-row">
+              <div class="form-group flex-half">
+                <label>Date Of Joining *</label>
+                <input nbInput fullWidth type="date" formControlName="dateOfJoining" />
+              </div>
+              <div class="form-group flex-half">
+                <label>Aadhar No</label>
+                <input nbInput fullWidth formControlName="aadharNo" placeholder="Aadhar Number" />
+              </div>
+            </div>
+            <div class="responsive-row">
+              <div class="form-group flex-half">
+                <label>Email ID</label>
+                <input nbInput fullWidth type="email" formControlName="emailId" placeholder="Email ID" />
+              </div>
+              <div class="form-group flex-half">
+                <nb-checkbox formControlName="activeStatus">Active</nb-checkbox>
+              </div>
+            </div>
+          </nb-tab>
+  
+          <nb-tab tabTitle="Addresses">
+            <button nbButton type="button" size="tiny" status="success" (click)="addAddress()">Add Address</button>
+            <div formArrayName="addresses" >
+            <div *ngFor="let addr of addresses.controls; let i = index; trackBy: trackByIndex" [formGroupName]="i" class="mb-3">
+              <nb-card size="tiny">
+                <nb-card-header>Address {{ i + 1 }}</nb-card-header>
+                <nb-card-body>
+                  <div class="responsive-row">
+                    <div class="form-group flex-full">
+                      <input nbInput fullWidth placeholder="Address Line 1" formControlName="addressLine1" />
+                    </div>
+                  </div>
+                  <div class="responsive-row">
+                    <div class="form-group flex-full">
+                      <input nbInput fullWidth placeholder="Address Line 2" formControlName="addressLine2" />
+                    </div>
+                  </div>
+                  <div class="responsive-row">
+                    <div class="form-group flex-full">
+                      <input nbInput fullWidth placeholder="Address Line 3" formControlName="addressLine3" />
+                    </div>
+                  </div>
+                  <div class="responsive-row">
+                    <div class="form-group flex-half">
+                      <input nbInput fullWidth placeholder="City" formControlName="city" />
+                    </div>
+                    <div class="form-group flex-half">
+                      <input nbInput fullWidth placeholder="Pincode" formControlName="pincode" />
+                    </div>
+                  </div>
+                  <div class="responsive-row">
+                    <div class="form-group flex-half">
+                      <input nbInput fullWidth placeholder="Mobile" formControlName="mobile" />
+                    </div>
+                    <div class="form-group flex-half">
+                      <button nbButton size="tiny" status="danger" (click)="removeAddress(i)">Remove</button>
+                    </div>
+                  </div>
+                </nb-card-body>
+              </nb-card>
+            </div>
+        </div>
+          </nb-tab>
+  
+          <nb-tab tabTitle="Bank Details">
+            <button nbButton type="button" size="tiny" status="success" (click)="addBank()">Add Bank Detail</button>
+            <div formArrayName="banks" >
+            <div *ngFor="let bank of banks.controls; let i = index; trackBy: trackByIndex" [formGroupName]="i" class="mb-3">
+              <nb-card size="tiny">
+                <nb-card-header>Bank {{ i + 1 }}</nb-card-header>
+                <nb-card-body>
+                  <div class="responsive-row">
+                    <div class="form-group flex-half">
+                      <input nbInput fullWidth placeholder="Bank Name" formControlName="bankName" />
+                    </div>
+                    <div class="form-group flex-half">
+                      <input nbInput fullWidth placeholder="Branch Name" formControlName="branchName" />
+                    </div>
+                    
+                  </div>
+                  <div class="responsive-row">
+                    <div class="form-group flex-half">
+                      <input nbInput fullWidth placeholder="Account No" formControlName="accountNo" />
+                    </div>
+                    <div class="form-group flex-half">
+                      <input nbInput fullWidth placeholder="IFSC Code" formControlName="ifscCode" />
+                    </div>
+                    <div class="form-group flex-half">
+                      <button nbButton size="tiny" status="danger" (click)="removeBank(i)">Remove</button>
+                    </div>
+                  </div>
+                </nb-card-body>
+              </nb-card>
+            </div>
+        </div>
+          </nb-tab>
+  
+          <nb-tab tabTitle="Attributes">
+            <button nbButton type="button" size="tiny" status="success" (click)="addAttribute()">Add Attribute</button>
+            <div formArrayName="attributes">
+              <div *ngFor="let attrGroup of attributes.controls; let i = index; trackBy: trackByIndex" [formGroupName]="i" class="mb-3">
+                <nb-card size="tiny">
+                  <nb-card-header>Attribute {{ i + 1 }}</nb-card-header>
+                  <nb-card-body>
+                    <div class="responsive-row">
+                      <!-- Attribute Name (Dropdown from master) -->
+                      <div class="form-group flex-half">
+                        <nb-select
+                          placeholder="Select Attribute"
+                          formControlName="id"
+                          (selectedChange)="onAttributeSelected(i)">
+                          <nb-option *ngFor="let attr of availableAttributes" [value]="attr.id">
+                            {{ attr.attributeName }}
+                          </nb-option>
+                        </nb-select>
+                      </div>
+          
+                      <!-- Attribute Value (Dynamic dropdown or textbox based on type) -->
+                      <div class="form-group flex-half">
+                        <ng-container [ngSwitch]="getAttributeType(i)">
+                          <!-- Dropdown -->
+                          <nb-select *ngSwitchCase="'Dropdown'" formControlName="value">
+                            <nb-option
+                              *ngFor="let val of getAttributeValues(i)"
+                              [value]="val.value">{{ val.value }}
+                            </nb-option>
+                          </nb-select>
+            
+                          <!-- String/Other -->
+                          <input nbInput *ngSwitchDefault fullWidth placeholder="Value" formControlName="value" />
+                        </ng-container>
+                      </div>
+                    </div>
+            
+                    <button nbButton size="tiny" status="danger" (click)="removeAttribute(i)">Remove</button>
+                  </nb-card-body>
+                </nb-card>
+              </div>
+            </div>
+            
+          </nb-tab>
+  
+          <nb-tab tabTitle="Certificates">
+            <button nbButton type="button" size="tiny" status="success" (click)="addCertificate()">Add Certificate</button>
+            <div formArrayName="certificates">
+                <div *ngFor="let cert of certificates.controls; let i = index; trackBy: trackByIndex" [formGroupName]="i" class="mb-3">
+              <nb-card size="tiny">
+                <nb-card-header>Certificate {{ i + 1 }}</nb-card-header>
+                <nb-card-body>
+                  <div class="responsive-row">
+                    <div class="form-group flex-half">
+                      <input nbInput fullWidth placeholder="Certificate Name" formControlName="certificateName" />
+                    </div>
+                    <div class="form-group flex-half">
+                      <input nbInput fullWidth placeholder="Issuer" formControlName="issuer" />
+                    </div>
+                  </div>
+                  <div class="responsive-row">
+                    <div class="form-group flex-half">
+                      <input nbInput fullWidth type="date" formControlName="issueDate" />
+                    </div>
+                    <div class="form-group flex-half">
+                      <input type="file" (change)="onFileChange($event, i)" />
+                    </div>
+                  </div>
+                  <nb-checkbox formControlName="verifiedStatus">Verified</nb-checkbox>
+                  <button nbButton size="tiny" type="button"  status="danger" (click)="removeCertificate(i)">Remove</button>
+                </nb-card-body>
+              </nb-card>
+            </div>
+        </div>
+          </nb-tab>
+        </nb-tabset>
+  
+        <button nbButton status="primary" type="submit" [disabled]="employeeForm.invalid" class="mt-3">
+          Save
+        </button>
+        <button nbButton status="danger" type="button" (click)="router.navigate(['/pages/master/employeemaster'])" class="ml-2 mt-3">
+          Cancel
+        </button>
+      </form>
+    </nb-card-body>
+  </nb-card>
+  

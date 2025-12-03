@@ -1,0 +1,162 @@
+<!-- pay-component-form.component.html -->
+<nb-card>
+    <nb-card-header>
+      <h4>{{ isEditMode ? 'Edit' : 'Add' }} Pay Component</h4>
+      <button nbButton status="basic" size="small" (click)="onCancel()">
+        <nb-icon icon="arrow-back"></nb-icon> Back to List
+      </button>
+    </nb-card-header>
+    
+    <nb-card-body>
+      <form [formGroup]="form" (ngSubmit)="onSubmit()">
+        <!-- Component Name -->
+        <div class="form-row">
+          <nb-form-field class="full-width">
+            <nb-icon nbPrefix icon="edit-2"></nb-icon>
+            <input nbInput 
+                   formControlName="componentName" 
+                   placeholder="Component Name *"
+                   [status]="showFieldError('componentName') ? 'danger' : 'basic'">
+            <nb-error *ngIf="showFieldError('componentName')">
+              Component name is required
+            </nb-error>
+          </nb-form-field>
+        </div>
+
+        <!-- Component Description -->
+      <div class="form-row">
+        <nb-form-field class="full-width">
+          <nb-icon nbPrefix icon="file-text"></nb-icon>
+          <textarea nbInput
+                    formControlName="componentDescription"
+                    placeholder="Component Description"
+                    rows="2"
+                    [status]="showFieldError('componentDescription') ? 'danger' : 'basic'">
+          </textarea>
+          <nb-error *ngIf="showFieldError('componentDescription')">
+            Description is required
+          </nb-error>
+        </nb-form-field>
+      </div>
+
+        
+        <!-- Pay Group Selection -->
+        <div class="form-row">
+          <nb-form-field class="full-width">
+            <nb-icon nbPrefix icon="layers"></nb-icon>
+            <nb-select formControlName="payGroupId" 
+                      placeholder="Select Pay Group *"
+                      [status]="showFieldError('payGroupId') ? 'danger' : 'basic'">
+              <nb-option *ngFor="let group of payGroups" [value]="group.id">
+                {{ group.categoryName }} ({{ group.payableType }})
+              </nb-option>
+            </nb-select>
+            <nb-error *ngIf="showFieldError('payGroupId')">
+              Pay group selection is required
+            </nb-error>
+            <nb-hint *ngIf="payGroups.length === 0" status="warning">
+              No pay groups available. Please create pay groups first.
+            </nb-hint>
+          </nb-form-field>
+        </div>
+  
+        <!-- Calculation Type -->
+        <div class="form-row">
+          <nb-form-field class="full-width">
+            <nb-icon nbPrefix icon="calculator"></nb-icon>
+            <nb-select formControlName="calculationType" 
+                      placeholder="Calculation Type *"
+                      [status]="showFieldError('calculationType') ? 'danger' : 'basic'">
+              <nb-option *ngFor="let type of calculationTypes" [value]="type">
+                {{ type }}
+              </nb-option>
+            </nb-select>
+            <nb-error *ngIf="showFieldError('calculationType')">
+              Calculation type is required
+            </nb-error>
+          </nb-form-field>
+        </div>
+  
+        <!-- Proration Section -->
+        <nb-accordion>
+          <nb-accordion-item>
+            <nb-accordion-item-header>
+              <nb-icon icon="clock"></nb-icon>
+              Proration Settings
+            </nb-accordion-item-header>
+            <nb-accordion-item-body>
+              <div class="form-row">
+                <nb-checkbox formControlName="isProrated">Enable Proration</nb-checkbox>
+                
+                <nb-form-field *ngIf="form.get('isProrated').value" class="full-width">
+                  <nb-icon nbPrefix icon="clock"></nb-icon>
+                  <nb-select formControlName="prorationBase" 
+                            placeholder="Proration Base *"
+                            [status]="showFieldError('prorationBase') ? 'danger' : 'basic'">
+                    <nb-option *ngFor="let base of prorationBases" [value]="base">
+                      {{ base }}
+                    </nb-option>
+                  </nb-select>
+                  <nb-error *ngIf="showFieldError('prorationBase')">
+                    Proration base is required when enabled
+                  </nb-error>
+                  <nb-hint>
+                    Determines how the amount will be prorated for partial periods
+                  </nb-hint>
+                </nb-form-field>
+              </div>
+            </nb-accordion-item-body>
+          </nb-accordion-item>
+        </nb-accordion>
+  
+        <!-- Formula Section (Conditional) -->
+        <div *ngIf="form.get('calculationType').value === 'Formula'" class="form-row">
+          <nb-form-field class="full-width">
+            <nb-icon nbPrefix icon="code"></nb-icon>
+            <textarea nbInput 
+                     formControlName="formula" 
+                     placeholder="Calculation Formula *"
+                     [status]="showFieldError('formula') ? 'danger' : 'basic'"
+                     rows="2"></textarea>
+            <nb-error *ngIf="showFieldError('formula')">
+              Formula is required for formula-based calculations
+            </nb-error>
+            <nb-hint>
+              Examples: <code>Basic * 0.4</code> (40% of Basic), 
+              <code>Basic + DA + 1000</code>, 
+              <code>(Basic + DA) * 0.1</code>
+            </nb-hint>
+          </nb-form-field>
+        </div>
+  
+        <!-- Component Properties -->
+        <div class="form-row properties-grid">
+          <nb-checkbox formControlName="isTaxable">Taxable</nb-checkbox>
+          <nb-checkbox formControlName="isDeduction">Deduction</nb-checkbox>
+          <nb-checkbox formControlName="displayInPayslip">Show in Payslip</nb-checkbox>
+        </div>
+  
+        <!-- Form Actions -->
+        <div class="form-actions">
+          <button nbButton 
+                  status="primary" 
+                  type="submit" 
+                  [disabled]="isLoading || form.invalid"
+                  [class.btn-pulse]="isLoading">
+            <nb-icon *ngIf="!isLoading" icon="save"></nb-icon>
+            <nb-icon *ngIf="isLoading" icon="loader-outline" animation="pulse"></nb-icon>
+            {{ isEditMode ? 'Update' : 'Save' }} Component
+          </button>
+          
+          <button nbButton 
+                  status="basic" 
+                  type="button" 
+                  (click)="onCancel()"
+                  class="ml-2">
+            <nb-icon icon="close"></nb-icon>
+            Cancel
+          </button>
+        </div>
+      </form>
+    </nb-card-body>
+  </nb-card>

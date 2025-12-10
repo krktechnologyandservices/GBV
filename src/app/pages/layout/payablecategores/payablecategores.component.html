@@ -1,90 +1,292 @@
-<nb-card>
-    <nb-card-header class="text-primary font-weight-bold">
-      Create Payable Category
-    </nb-card-header>
-  
-    <nb-card-body>
+<!-- Mobile Overlay -->
+<div class="mobile-overlay" [class.show-overlay]="isMobileView && showForm" 
+     (click)="showForm = false"></div>
+
+<div class="container-fluid p-3">
+  <!-- Header -->
+  <div class="header-container">
+    <div class="header-content">
+      <div class="title-section">
+        <h4>
+          <nb-icon icon="layers-outline"></nb-icon>
+          Payable Categories
+        </h4>
+        <p>Create and manage payable categories for your organization</p>
+      </div>
+      
+      <div class="mobile-actions">
+        <button nbButton status="primary" size="small" (click)="showForm = true">
+          <nb-icon icon="plus-outline"></nb-icon>
+          New Category
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="content-wrapper">
+    <!-- Form Section -->
+    <div class="form-section" [class.show-form]="showForm">
+      <!-- Mobile Form Header -->
+      <div class="form-header" *ngIf="isMobileView">
+        <h5>{{ isEditing ? 'Edit Category' : 'New Category' }}</h5>
+        <button class="close-btn" (click)="showForm = false">
+          <nb-icon icon="close-outline"></nb-icon>
+        </button>
+      </div>
+
+      <!-- Form Title (Desktop) -->
+      <h5 class="form-title" *ngIf="!isMobileView">
+        <nb-icon [icon]="isEditing ? 'edit-outline' : 'plus-circle-outline'"></nb-icon>
+        {{ isEditing ? 'Edit Category' : 'Create New Category' }}
+      </h5>
+
       <form [formGroup]="payableForm" (ngSubmit)="onSubmit()" class="form-layout">
-  
         <!-- Category Name -->
         <div class="form-group">
-          <label>Category Name</label>
-          <input nbInput fullWidth formControlName="categoryName" placeholder="e.g. Executive" />
+          <label>
+            Category Name <span class="required">*</span>
+          </label>
+          <input 
+            nbInput 
+            fullWidth 
+            formControlName="categoryName" 
+            placeholder="e.g., Executive Staff"
+            [status]="payableForm.get('categoryName')?.invalid && payableForm.get('categoryName')?.touched ? 'danger' : 'basic'"
+          />
+          <div class="error-message" *ngIf="payableForm.get('categoryName')?.invalid && payableForm.get('categoryName')?.touched">
+            Please enter a valid category name (2-50 characters)
+          </div>
         </div>
-  
+
         <!-- Payable Type -->
         <div class="form-group">
-          <label>Payable Type</label>
-          <div class="type-selector">
-            <button
-              nbButton
+          <label>Payable Type <span class="required">*</span></label>
+          <div class="type-options">
+            <div 
               *ngFor="let type of payableTypes"
-              outline
-              shape="round"
-              size="medium"
-              class="pay-type-btn"
-              [status]="payableForm.get('payableType')?.value === type ? 'primary' : 'basic'"
-              (click)="payableForm.get('payableType')?.setValue(type)"
-              type="button"
+              class="type-option"
+              [class.selected]="payableForm.get('payableType')?.value === type.id"
+              (click)="payableForm.get('payableType')?.setValue(type.id)"
             >
-              {{ type }}
+              <nb-icon [icon]="type.icon"></nb-icon>
+              <div class="type-name">{{ type.name }}</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Fixed Days (Conditional) -->
+        <div class="form-group" *ngIf="payableForm.get('payableType')?.value === 'Fixed Days'">
+          <label>
+            Fixed Days <span class="required">*</span>
+            <small class="text-muted d-block mt-1">Enter number of payable days (1-365)</small>
+          </label>
+          <input 
+            nbInput 
+            fullWidth 
+            type="number" 
+            formControlName="fixedDays" 
+            placeholder="e.g., 30"
+            [status]="payableForm.get('fixedDays')?.invalid && payableForm.get('fixedDays')?.touched ? 'danger' : 'basic'"
+            min="1"
+            max="365"
+          />
+          <div class="error-message" *ngIf="payableForm.get('fixedDays')?.invalid && payableForm.get('fixedDays')?.touched">
+            Please enter a valid number between 1 and 365
+          </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="form-actions">
+          <button 
+            nbButton 
+            status="primary" 
+            [disabled]="isSubmitting || payableForm.invalid"
+            type="submit"
+            class="full-width-mobile"
+          >
+            <nb-icon [icon]="isSubmitting ? 'loader-outline' : (isEditing ? 'save-outline' : 'plus-outline')"></nb-icon>
+            {{ isSubmitting ? 'Saving...' : (isEditing ? 'Update' : 'Create') }}
+          </button>
+          
+          <div class="spacer"></div>
+          
+          <button 
+            nbButton 
+            status="basic" 
+            type="button"
+            (click)="resetForm()"
+            class="full-width-mobile"
+          >
+            <nb-icon icon="refresh-outline"></nb-icon>
+            Reset
+          </button>
+          
+          <button 
+            nbButton 
+            status="warning" 
+            type="button"
+            (click)="showForm = false"
+            *ngIf="isMobileView"
+            class="full-width-mobile"
+          >
+            <nb-icon icon="arrow-back-outline"></nb-icon>
+            Back to List
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- List Section -->
+    <div class="list-section">
+      <div class="list-header">
+        <h5>
+          Categories List
+          <span class="count-badge">{{ filteredList.length }}</span>
+        </h5>
+        
+        <div class="search-box">
+          <nb-input 
+            shape="round" 
+            placeholder="Search categories..."
+            [(ngModel)]="searchTerm"
+            (ngModelChange)="applySearch()"
+            fullWidth
+          >
+            <nb-icon nbPrefix icon="search-outline"></nb-icon>
+          </nb-input>
+        </div>
+      </div>
+
+      <!-- Categories Table -->
+      <div class="table-responsive" *ngIf="filteredList.length > 0; else emptyState">
+        <table>
+          <thead>
+            <tr>
+              <th>Category</th>
+              <th>Type</th>
+              <th>Days</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let cat of getPageItems()" class="fade-in">
+              <td>
+                <div class="category-cell">
+                  <div class="category-icon">
+                    <nb-icon [icon]="getTypeIcon(cat.payableType)"></nb-icon>
+                  </div>
+                  <div class="category-info">
+                    <h6>{{ cat.categoryName }}</h6>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <span class="type-badge" [class]="cat.payableType.toLowerCase().replace(' ', '-')">
+                  {{ cat.payableType }}
+                </span>
+              </td>
+              <td>
+                <span *ngIf="cat.fixedDays; else dash" class="days-badge">
+                  <nb-icon icon="clock-outline"></nb-icon>
+                  {{ cat.fixedDays }}
+                </span>
+                <ng-template #dash>-</ng-template>
+              </td>
+              <td>
+                <div class="action-buttons">
+                  <button 
+                    nbButton 
+                    size="small" 
+                    status="info"
+                    (click)="editCategory(cat)"
+                    title="Edit"
+                  >
+                    <nb-icon icon="edit-2-outline"></nb-icon>
+                    <span class="hide-on-mobile">Edit</span>
+                  </button>
+                  <button 
+                    nbButton 
+                    size="small" 
+                    status="danger"
+                    (click)="deleteCategory(cat.id)"
+                    title="Delete"
+                  >
+                    <nb-icon icon="trash-2-outline"></nb-icon>
+                    <span class="hide-on-mobile">Delete</span>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- Pagination -->
+        <div class="pagination-container" *ngIf="filteredList.length > itemsPerPage">
+          <div class="pagination-info">
+            Showing {{ (currentPage - 1) * itemsPerPage + 1 }} to 
+            {{ Math.min(currentPage * itemsPerPage, filteredList.length) }} of {{ filteredList.length }} entries
+          </div>
+          <div class="pagination-controls">
+            <button 
+              nbButton 
+              ghost 
+              size="small"
+              [disabled]="currentPage === 1"
+              (click)="currentPage = currentPage - 1"
+            >
+              <nb-icon icon="chevron-left-outline"></nb-icon>
+            </button>
+            
+            <div class="page-numbers">
+              <ng-container *ngFor="let page of [].constructor(getTotalPages()); let i = index">
+                <ng-container *ngIf="showPageButton(i + 1, currentPage, getTotalPages())">
+                  <button 
+                    class="page-btn"
+                    [class.active]="currentPage === i + 1"
+                    (click)="currentPage = i + 1"
+                  >
+                    {{ i + 1 }}
+                  </button>
+                </ng-container>
+              </ng-container>
+            </div>
+            
+            <button 
+              nbButton 
+              ghost 
+              size="small"
+              [disabled]="currentPage * itemsPerPage >= filteredList.length"
+              (click)="currentPage = currentPage + 1"
+            >
+              <nb-icon icon="chevron-right-outline"></nb-icon>
             </button>
           </div>
         </div>
-  
-        <!-- Fixed Days Input -->
-        <div class="form-group" *ngIf="payableForm.get('payableType')?.value === 'Fixed Days'">
-          <label>Number of Fixed Days</label>
-          <input nbInput fullWidth type="number" formControlName="fixedDays" placeholder="e.g. 10" />
-        </div>
-  
-        <!-- Submit Button -->
-        <div class="form-actions mt-4">
-          <button nbButton status="success" shape="round" [disabled]="isSubmitting" type="submit">
-            {{ isSubmitting ? 'Saving...' : 'Save' }}
+      </div>
+
+      <!-- Empty State -->
+      <ng-template #emptyState>
+        <div class="empty-state">
+          <nb-icon icon="folder-open-outline"></nb-icon>
+          <h5>No payable categories found</h5>
+          <p *ngIf="searchTerm">
+            No results found for "{{ searchTerm }}"
+          </p>
+          <p *ngIf="!searchTerm">
+            Start by creating your first payable category
+          </p>
+          <button 
+            nbButton 
+            status="primary" 
+            size="small"
+            (click)="resetForm(); showForm = true"
+          >
+            <nb-icon icon="plus-outline"></nb-icon>
+            Create Category
           </button>
-  
-          <span class="text-success ml-3" *ngIf="successMessage">{{ successMessage }}</span>
-          <span class="text-danger ml-3" *ngIf="errorMessage">{{ errorMessage }}</span>
         </div>
-  
-      </form>
-
-      <hr class="my-4" />
-<h5 class="mb-3">Saved Payable Categories</h5>
-
-<nb-card>
-  <nb-card-body *ngIf="payableList.length > 0; else noData">
-    <table class="table table-hover table-bordered table-sm">
-      <thead class="thead-light">
-        <tr>
-          <th>Category</th>
-          <th>Type</th>
-          <th>Fixed Days</th>
-          <th style="width: 80px;"></th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let cat of payableList">
-          <td>{{ cat.categoryName }}</td>
-          <td>{{ cat.payableType }}</td>
-          <td>{{ cat.fixedDays || '-' }}</td>
-          <td>
-            <button nbButton size="tiny" status="info" (click)="editCategory(cat)">Edit</button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </nb-card-body>
-</nb-card>
-
-<ng-template #noData>
-  <div class="text-muted small">No payable categories found.</div>
-</ng-template>
-
-
-
-
-    </nb-card-body>
-  </nb-card>
-  
+      </ng-template>
+    </div>
+  </div>
+</div>

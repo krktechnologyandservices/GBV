@@ -9,9 +9,12 @@ import { NbToastrService, NbGlobalPhysicalPosition } from '@nebular/theme';
 })
 export class OrgAttributesComponent implements OnInit {
   attributes: OrgAttributeDefinition[] = [];
+  filteredAttributes: OrgAttributeDefinition[] = [];
   selectedAttribute: OrgAttributeDefinition | null = null;
   dropdownValues: OrgAttributeDropdownValue[] = [];
-
+  dataTypes = ['Text', 'Number', 'Date', 'Dropdown', 'Boolean'];
+  
+  // Form data (keeping your existing structure)
   newAttribute: OrgAttributeDefinition = {
     attributeName: '',
     dataType: 'Text',
@@ -21,7 +24,20 @@ export class OrgAttributesComponent implements OnInit {
 
   newDropdownValue: string = '';
   isLoading: boolean = false;
-
+  
+  // Mobile state
+  isMobileView: boolean = false;
+  showForm: boolean = true;
+  showDropdownSection: boolean = false;
+  
+  // Search & Filter
+  searchTerm: string = '';
+  typeFilter: string = 'all';
+  
+  // Pagination
+  currentPage: number = 1;
+  itemsPerPage: number = 10;
+  
   private toastPosition = NbGlobalPhysicalPosition.TOP_RIGHT;
 
   constructor(
@@ -30,7 +46,24 @@ export class OrgAttributesComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    this.checkViewport();
+    window.addEventListener('resize', () => this.checkViewport());
+    
     this.loadAttributes();
+  }
+
+  ngOnDestroy(): void {
+    window.removeEventListener('resize', () => this.checkViewport());
+  }
+
+  checkViewport(): void {
+    this.isMobileView = window.innerWidth < 768;
+    if (this.isMobileView) {
+      this.showForm = false;
+      this.showDropdownSection = false;
+    } else {
+      this.showForm = true;
+    }
   }
 
   loadAttributes(): void {
@@ -38,6 +71,7 @@ export class OrgAttributesComponent implements OnInit {
     this.attributeService.getAttributes().subscribe({
       next: (data) => {
         this.attributes = data;
+        this.filteredAttributes = [...data];
         this.isLoading = false;
       },
       error: (err) => {
@@ -45,6 +79,32 @@ export class OrgAttributesComponent implements OnInit {
         this.isLoading = false;
       }
     });
+  }
+
+  applySearch(): void {
+    if (!this.searchTerm && this.typeFilter === 'all') {
+      this.filteredAttributes = [...this.attributes];
+      return;
+    }
+    
+    let filtered = [...this.attributes];
+    
+    // Apply type filter
+    if (this.typeFilter !== 'all') {
+      filtered = filtered.filter(attr => attr.dataType === this.typeFilter);
+    }
+    
+    // Apply search filter
+    if (this.searchTerm) {
+      const term = this.searchTerm.toLowerCase();
+      filtered = filtered.filter(attr => 
+        attr.attributeName.toLowerCase().includes(term) ||
+        attr.dataType.toLowerCase().includes(term)
+      );
+    }
+    
+    this.filteredAttributes = filtered;
+    this.currentPage = 1;
   }
 
   createAttribute(): void {
@@ -60,6 +120,10 @@ export class OrgAttributesComponent implements OnInit {
         this.resetAttributeForm();
         this.loadAttributes();
         this.isLoading = false;
+        
+        if (this.isMobileView) {
+          this.showForm = false;
+        }
       },
       error: () => {
         this.showToast('Failed to create attribute', 'Error', 'danger');
@@ -71,22 +135,25 @@ export class OrgAttributesComponent implements OnInit {
   deleteAttribute(id: number, event?: Event): void {
     event?.stopPropagation();
 
-    this.isLoading = true;
-    this.attributeService.deleteAttribute(id).subscribe({
-      next: () => {
-        this.showToast('Attribute deleted', 'Success', 'success');
-        if (this.selectedAttribute?.id === id) {
-          this.selectedAttribute = null;
-          this.dropdownValues = [];
+    if (confirm('Are you sure you want to delete this attribute?')) {
+      this.isLoading = true;
+      this.attributeService.deleteAttribute(id).subscribe({
+        next: () => {
+          this.showToast('Attribute deleted', 'Success', 'success');
+          if (this.selectedAttribute?.id === id) {
+            this.selectedAttribute = null;
+            this.dropdownValues = [];
+            this.showDropdownSection = false;
+          }
+          this.loadAttributes();
+          this.isLoading = false;
+        },
+        error: () => {
+          this.showToast('Failed to delete attribute', 'Error', 'danger');
+          this.isLoading = false;
         }
-        this.loadAttributes();
-        this.isLoading = false;
-      },
-      error: () => {
-        this.showToast('Failed to delete attribute', 'Error', 'danger');
-        this.isLoading = false;
-      }
-    });
+      });
+    }
   }
 
   onSelectAttribute(attribute: OrgAttributeDefinition): void {
@@ -94,8 +161,14 @@ export class OrgAttributesComponent implements OnInit {
 
     if (attribute.dataType === 'Dropdown') {
       this.loadDropdownValues(attribute.id!);
+      if (this.isMobileView) {
+        this.showDropdownSection = true;
+      }
     } else {
       this.dropdownValues = [];
+      if (this.isMobileView) {
+        this.showDropdownSection = false;
+      }
     }
   }
 
@@ -144,20 +217,22 @@ export class OrgAttributesComponent implements OnInit {
   deleteDropdownValue(id: number, event?: Event): void {
     event?.stopPropagation();
 
-    this.isLoading = true;
-    this.attributeService.deleteDropdownValue(id).subscribe({
-      next: () => {
-        this.showToast('Dropdown value deleted', 'Success', 'success');
-        if (this.selectedAttribute) {
-          this.loadDropdownValues(this.selectedAttribute.id!);
+    if (confirm('Are you sure you want to delete this dropdown value?')) {
+      this.isLoading = true;
+      this.attributeService.deleteDropdownValue(id).subscribe({
+        next: () => {
+          this.showToast('Dropdown value deleted', 'Success', 'success');
+          if (this.selectedAttribute) {
+            this.loadDropdownValues(this.selectedAttribute.id!);
+          }
+          this.isLoading = false;
+        },
+        error: () => {
+          this.showToast('Failed to delete dropdown value', 'Error', 'danger');
+          this.isLoading = false;
         }
-        this.isLoading = false;
-      },
-      error: () => {
-        this.showToast('Failed to delete dropdown value', 'Error', 'danger');
-        this.isLoading = false;
-      }
-    });
+      });
+    }
   }
 
   resetAttributeForm(): void {
@@ -167,6 +242,23 @@ export class OrgAttributesComponent implements OnInit {
       isRequired: false,
       isUnique: false,
     };
+    this.newDropdownValue = '';
+  }
+
+  getPageItems(): OrgAttributeDefinition[] {
+    const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+    return this.filteredAttributes.slice(startIndex, startIndex + this.itemsPerPage);
+  }
+
+  getDataTypeIcon(type: string): string {
+    const icons: { [key: string]: string } = {
+      'Text': 'text-outline',
+      'Number': 'hash-outline',
+      'Date': 'calendar-outline',
+      'Dropdown': 'list-outline',
+      'Boolean': 'checkmark-circle-outline'
+    };
+    return icons[type] || 'question-mark-outline';
   }
 
   showToast(message: string, title: string, status: 'success' | 'warning' | 'danger'): void {

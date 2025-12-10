@@ -8,10 +8,14 @@ import { MasterComponent } from './master.component';
 // import { ListComponent } from './list/list.component';
 // import { StepperComponent } from './stepper/stepper.component';
 
-import { StudentsComponent } from './students/students.component';
-import { StudentsFormComponent } from './students/studentsform/studentsform.component';
-import { RoomComponent } from './rooms/rooms.component';
-import { RoomFormComponent } from './rooms/rooms-form/rooms-form.component';
+import { PayableCategoriesComponent } from './payablecategores/payablecategores.component';
+import { OrgAttributesComponent } from './org-attributes/org-attributes.component';
+
+import  {PayComponent} from './payablecomponent/payablecomponent.component';
+
+import  {TaxcomponentComponent} from './taxcomponent/taxcomponent.component';
+import  {EmployeeNewComponent} from './employee-new/employee-new.component';
+import  {EmployeeFormComponent} from './employee-form/employee-form.component';
 const routes: Routes = [{
   path: '',
   component: MasterComponent,
@@ -21,20 +25,34 @@ const routes: Routes = [{
     //   component: StepperComponent,
     // },
     {
-      path: 'students',
-      component: StudentsComponent,
-      
-    }
-    ,{ path: 'students/add', component: StudentsFormComponent },
-    { path: 'students/edit/:id', component: StudentsFormComponent },
-    { path: '', redirectTo: 'students', pathMatch: 'full' },
-    {
-      path: 'rooms',
-      component: RoomComponent,
-      
+      path: 'payablecategories',
+      component: PayableCategoriesComponent,
     },
-    { path: 'rooms/add', component: RoomFormComponent },
-{ path: 'rooms/edit/:id', component: RoomFormComponent },
+    
+    {
+      path: 'OrgAttributes',
+      component: OrgAttributesComponent,
+    },
+    {
+      path: 'payablecomponent',
+      component: PayComponent,
+    },
+    {
+      path: 'taxablecomponent',
+      component: TaxcomponentComponent,
+    },
+    {
+      path: 'employeemaster',
+      component: EmployeeNewComponent,
+    },
+    {
+      path: 'createmployee',
+      component: EmployeeFormComponent,
+    },
+    {
+      path: 'editemployee/:id',
+      component: EmployeeFormComponent,
+    }
 
    
     // {

@@ -9,7 +9,7 @@ import {
   NbStepperModule,
   NbTabsetModule, NbUserModule,NbCheckboxModule,NbInputModule ,NbSelectModule,
   NbIconModule,
-  NbFormFieldModule,NbAutocompleteModule ,NbBadgeModule, NbLayoutModule
+  NbFormFieldModule,NbAutocompleteModule 
 
 } from '@nebular/theme';
 
@@ -28,16 +28,6 @@ import { LopProcessorComponent } from './attendance/lopprocess/lopprocess.compon
 import { PayPeriodListComponent } from './payperiod/payperiod.component';
 import { PayPeriodFormComponent } from './payperiod/payperiod-form/payperiod-form.component';
 import { EmployeePayComponent } from './salarycomponents/salarycomponents.component';
-import { BookingComponent } from './booking/booking.component';
-import { PaymentListComponent } from './payments/payments.component';
-import { PaymentFormComponent } from './payments/paymentsforms/paymentsforms.component';
-import { BookingFormComponent } from './booking/bookingforms/bookingforms.component';
-import { BillsComponent } from './bills/bills.component';
-
-import { AdminApprovalComponent } from './bills/admin-approval/admin-approval.component';
-import { OfflinePaymentModalComponent } from './bills/offlinepaymentmodal/offlinepaymentmodal.component';
-import {DayBookComponent} from './daybook/daybook.component';
-import { PaymentRegisterComponent } from './paymentregister/paymentregister.component';
 
 
 @NgModule({
@@ -58,7 +48,7 @@ import { PaymentRegisterComponent } from './paymentregister/paymentregister.comp
     NbInputModule ,
     NbSelectModule,
     NbIconModule,
-    NbFormFieldModule,NbAutocompleteModule ,NbBadgeModule,NbLayoutModule
+    NbFormFieldModule,NbAutocompleteModule 
   ],
   declarations: [
     TransactionsComponent,
@@ -72,18 +62,7 @@ import { PaymentRegisterComponent } from './paymentregister/paymentregister.comp
     LopProcessorComponent,
     PayPeriodListComponent,
     PayPeriodFormComponent,
-    EmployeePayComponent,
-    BookingComponent,
-    PaymentListComponent,
-    PaymentFormComponent,
-    BookingFormComponent,
-    BillsComponent,
-
-    AdminApprovalComponent,
-    OfflinePaymentModalComponent,
-    DayBookComponent,
-    PaymentRegisterComponent
-    
+    EmployeePayComponent
   
   ],
   

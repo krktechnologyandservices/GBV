@@ -5,7 +5,7 @@
  */
 export const environment = {
   production: false,
-  apiBaseUrl: 'https://hostelservice.runasp.net/api',
+  apiBaseUrl: 'https://midipay.runasp.net/api',
   apiProcessUrl: 'https://midipayprocess.runasp.net/api',
   apiReportUrl: 'https://midipayreport.runasp.net/api',
-}
+};

@@ -1,47 +1,447 @@
-<nb-card>
-  <nb-card-header>Employees</nb-card-header>
-  <nb-card-body>
+<nb-card class="employee-management-card">
+  <!-- Header with Gradient -->
+  <nb-card-header class="header-gradient">
+    <div class="header-content">
+      <div class="title-section">
+        <div class="header-icon-container">
+          <nb-icon icon="people-outline" class="header-icon"></nb-icon>
+          <div class="pulse-dot"></div>
+        </div>
+        <div>
+          <h3 class="card-title">Employee Directory</h3>
+          <p class="card-subtitle">Manage your team members efficiently</p>
+        </div>
+      </div>
+      
+      <div class="header-stats">
+        <div class="stat-item">
+          <nb-icon icon="checkmark-circle-2-outline" status="success"></nb-icon>
+          <span class="stat-value">{{ activeCount }}</span>
+          <span class="stat-label">Active</span>
+        </div>
+        <div class="stat-item">
+          <nb-icon icon="pause-circle-outline" status="warning"></nb-icon>
+          <span class="stat-value">{{ inactiveCount }}</span>
+          <span class="stat-label">Inactive</span>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Enhanced Search Bar -->
+    <div class="search-container-glass">
+      <div class="search-wrapper">
+        <nb-icon icon="search-outline" class="search-icon"></nb-icon>
+        <input type="text" 
+               class="search-input" 
+               placeholder="Search employees..."
+               [(ngModel)]="searchTerm"
+               (ngModelChange)="onSearchChange($event)" />
+        <button class="search-clear" *ngIf="searchTerm" (click)="clearSearch()">
+          <nb-icon icon="close-outline"></nb-icon>
+        </button>
+        <button class="search-filter-btn" (click)="toggleAdvancedFilters()">
+          <nb-icon icon="funnel-outline"></nb-icon>
+        </button>
+      </div>
+      
+      <!-- Quick Actions -->
+      <div class="quick-actions">
+        <button nbButton 
+                status="primary" 
+                size="small"
+                ghost
+                (click)="refresh()">
+          <nb-icon icon="refresh-outline"></nb-icon>
+          <span>Refresh</span>
+        </button>
+        <button nbButton 
+                status="success" 
+                size="small"
+                routerLink="/pages/master/createmployee"
+                class="glow-button">
+          <nb-icon icon="person-add-outline"></nb-icon>
+          <span>Add New</span>
+        </button>
+      </div>
+    </div>
+    
+    <!-- Advanced Filters Panel -->
+    <div class="advanced-filters-panel" [class.active]="showAdvancedFilters">
+      <div class="filter-grid">
+        <nb-select placeholder="Status" 
+                  size="small"
+                  [(selected)]="statusFilter"
+                  (selectedChange)="applyFilters()"
+                  class="filter-select">
+          <nb-option value="">All Employees</nb-option>
+          <nb-option value="active">Active Only</nb-option>
+          <nb-option value="inactive">Inactive Only</nb-option>
+        </nb-select>
+        
+        <nb-select placeholder="Sort By" 
+                  size="small"
+                  [(selected)]="sortColumn"
+                  (selectedChange)="applyFilters()"
+                  class="filter-select">
+          <nb-option value="employeeCode">Employee Code</nb-option>
+          <nb-option value="firstName">Name</nb-option>
+          <nb-option value="activeStatus">Status</nb-option>
+        </nb-select>
+        
+        <button nbButton 
+                status="basic" 
+                size="small"
+                (click)="resetFilters()">
+          <nb-icon icon="filter-remove-outline"></nb-icon>
+          Clear Filters
+        </button>
+      </div>
+    </div>
+  </nb-card-header>
 
-    <div class="search-container" style="margin-bottom: 1rem;">
-      <input nbInput fullWidth placeholder="Search by Code, Name, or Email"
-             [(ngModel)]="searchTerm"
-             (ngModelChange)="onSearchChange($event)" />
+  <nb-card-body class="card-body-glass">
+    <!-- View Toggle with Stats -->
+    <div class="view-controls">
+      <div class="view-toggle-group">
+        <button nbButton 
+                ghost 
+                size="small"
+                [status]="viewMode === 'list' ? 'primary' : 'basic'"
+                (click)="viewMode = 'list'"
+                class="view-toggle-btn">
+          <nb-icon icon="list-outline"></nb-icon>
+          <span>List View</span>
+        </button>
+        <button nbButton 
+                ghost 
+                size="small"
+                [status]="viewMode === 'grid' ? 'primary' : 'basic'"
+                (click)="viewMode = 'grid'"
+                class="view-toggle-btn">
+          <nb-icon icon="grid-outline"></nb-icon>
+          <span>Grid View</span>
+        </button>
+        <button nbButton 
+                ghost 
+                size="small"
+                [status]="viewMode === 'compact' ? 'primary' : 'basic'"
+                (click)="viewMode = 'compact'"
+                class="view-toggle-btn mobile-only">
+          <nb-icon icon="menu-outline"></nb-icon>
+          <span>Compact</span>
+        </button>
+      </div>
+      
+      <div class="results-info">
+        <span class="results-count">{{ filteredEmployees.length }} employees</span>
+        <div class="view-actions">
+          <button nbButton 
+                  ghost 
+                  size="tiny"
+                  (click)="exportData()">
+            <nb-icon icon="download-outline"></nb-icon>
+          </button>
+        </div>
+      </div>
     </div>
 
-    <div class="button-group" style="margin-bottom: 1rem;">
-      <button nbButton status="primary" (click)="refresh()">Refresh Employees</button>
-      <button nbButton status="success" routerLink="/pages/master/createmployee">Add Employee</button>
+    <!-- Loading Animation -->
+    <div class="loading-container" *ngIf="loading">
+      <div class="loading-spinner">
+        <div class="spinner"></div>
+        <p>Loading employees...</p>
+      </div>
     </div>
 
-    <div class="table-scroll-top" #scrollTop (scroll)="syncScroll($event)">
-      <div style="width: 1500px;"></div> <!-- Must be wide enough to cover table content -->
+    <!-- Empty State -->
+    <div class="empty-state-container" *ngIf="!loading && filteredEmployees.length === 0">
+      <div class="empty-state-illustration">
+        <nb-icon icon="people-outline"></nb-icon>
+      </div>
+      <h3>No employees found</h3>
+      <p *ngIf="searchTerm || statusFilter">Try adjusting your search criteria or filters</p>
+      <p *ngIf="!searchTerm && !statusFilter">Add your first team member to get started</p>
+      <button nbButton 
+              status="primary"
+              routerLink="/pages/master/createmployee"
+              class="empty-action-btn">
+        <nb-icon icon="person-add-outline"></nb-icon>
+        Add First Employee
+      </button>
     </div>
 
-    <div class="table-wrapper" #tableWrapper (scroll)="syncScroll($event)">
-      <table class="table table-bordered table-hover">
-        <thead>
-          <tr>
-            <th>Code</th>
-            <th>Name</th>
-            <th>Email</th>
-            <th>Active</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let emp of filteredEmployees; trackBy: trackByEmployeeId">
-            <td>{{ emp.employeeCode }}</td>
-            <td>{{ emp.firstName }} {{ emp.lastName }}</td>
-            <td>{{ emp.emailId }}</td>
-            <td>{{ emp.activeStatus ? 'Yes' : 'No' }}</td>
-            <td>
-              <button nbButton size="tiny" status="info" [routerLink]="['/pages/master/editemployee', emp.employeeId]">Edit</button>
-              <button nbButton size="tiny" status="danger" (click)="delete(emp.employeeId)">Delete</button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+    <!-- List View - Enhanced -->
+    <div class="list-view-container" *ngIf="viewMode === 'list' && !loading && filteredEmployees.length > 0">
+      <div class="table-responsive">
+        <table class="modern-table">
+          <thead>
+            <tr>
+              <th class="sticky-header" (click)="sortBy('employeeCode')">
+                <div class="header-cell">
+                  <span>Employee Code</span>
+                  <nb-icon *ngIf="sortColumn === 'employeeCode'" 
+                          [icon]="sortDirection === 'asc' ? 'arrow-up' : 'arrow-down'">
+                  </nb-icon>
+                </div>
+              </th>
+              <th class="sticky-header" (click)="sortBy('firstName')">
+                <div class="header-cell">
+                  <span>Team Member</span>
+                  <nb-icon *ngIf="sortColumn === 'firstName'" 
+                          [icon]="sortDirection === 'asc' ? 'arrow-up' : 'arrow-down'">
+                  </nb-icon>
+                </div>
+              </th>
+              <th class="sticky-header">Contact</th>
+              <th class="sticky-header" (click)="sortBy('activeStatus')">
+                <div class="header-cell">
+                  <span>Status</span>
+                  <nb-icon *ngIf="sortColumn === 'activeStatus'" 
+                          [icon]="sortDirection === 'asc' ? 'arrow-up' : 'arrow-down'">
+                  </nb-icon>
+                </div>
+              </th>
+              <th class="sticky-header actions-header">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let emp of filteredEmployees; trackBy: trackByEmployeeId"
+                [class.inactive-row]="!emp.activeStatus"
+                class="table-row">
+              <td>
+                <div class="employee-code-cell">
+                  <div class="code-badge">{{ emp.employeeCode }}</div>
+                </div>
+              </td>
+              <td>
+                <div class="employee-info-cell">
+                  <div class="avatar-wrapper">
+                    <div class="avatar" [style.background]="getAvatarColor(emp)">
+                      {{ emp.firstName.charAt(0) }}{{ emp.lastName.charAt(0) }}
+                    </div>
+                    <div class="online-indicator" *ngIf="emp.activeStatus"></div>
+                  </div>
+                  <div class="employee-details">
+                    <h4 class="employee-name">{{ emp.firstName }} {{ emp.lastName }}</h4>
+                    <p class="employee-role">Team Member</p>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <div class="contact-cell">
+                  <a [href]="'mailto:' + emp.emailId" class="email-link">
+                    <nb-icon icon="email-outline"></nb-icon>
+                    {{ emp.emailId }}
+                  </a>
+                </div>
+              </td>
+              <td>
+                <div class="status-cell">
+                  <div class="status-badge" [class.active]="emp.activeStatus" [class.inactive]="!emp.activeStatus">
+                    <nb-icon [icon]="emp.activeStatus ? 'checkmark-circle' : 'pause-circle'"></nb-icon>
+                    {{ emp.activeStatus ? 'Active' : 'Inactive' }}
+                  </div>
+                </div>
+              </td>
+              <td class="actions-cell">
+                <div class="action-buttons">
+                  <button nbButton 
+                          ghost 
+                          size="tiny" 
+                          status="info"
+                          [routerLink]="['/pages/master/editemployee', emp.employeeId]"
+                          class="action-btn">
+                    <nb-icon icon="edit-2-outline"></nb-icon>
+                    <span>Edit</span>
+                  </button>
+                  <button nbButton 
+                          ghost 
+                          size="tiny" 
+                          status="danger"
+                          (click)="delete(emp.employeeId)"
+                          class="action-btn">
+                    <nb-icon icon="trash-2-outline"></nb-icon>
+                    <span>Delete</span>
+                  </button>
+                  <button nbButton 
+                          ghost 
+                          size="tiny" 
+                          status="basic"
+                          class="more-btn"
+                          [nbPopover]="actionMenu"
+                          nbPopoverTrigger="click">
+                    <nb-icon icon="more-vertical-outline"></nb-icon>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
 
+    <!-- Grid View - Card Style -->
+    <div class="grid-view-container" *ngIf="viewMode === 'grid' && !loading && filteredEmployees.length > 0">
+      <div class="employee-cards-grid">
+        <div class="employee-card" 
+             *ngFor="let emp of filteredEmployees; trackBy: trackByEmployeeId"
+             [class.inactive-card]="!emp.activeStatus">
+          <div class="card-header">
+            <div class="avatar-container">
+              <div class="card-avatar" [style.background]="getAvatarColor(emp)">
+                {{ emp.firstName.charAt(0) }}{{ emp.lastName.charAt(0) }}
+              </div>
+              <div class="status-dot" [class.active]="emp.activeStatus"></div>
+            </div>
+            <div class="card-title">
+              <h4>{{ emp.firstName }} {{ emp.lastName }}</h4>
+              <p class="employee-id">{{ emp.employeeCode }}</p>
+            </div>
+            <button nbButton 
+                    ghost 
+                    size="tiny"
+                    class="card-menu-btn"
+                    [nbPopover]="actionMenu"
+                    nbPopoverTrigger="click">
+              <nb-icon icon="more-vertical-outline"></nb-icon>
+            </button>
+          </div>
+          
+          <div class="card-body">
+            <div class="card-info">
+              <div class="info-item">
+                <nb-icon icon="email-outline"></nb-icon>
+                <span class="info-text">{{ emp.emailId }}</span>
+              </div>
+              <div class="info-item">
+                <nb-icon icon="calendar-outline"></nb-icon>
+                <span class="info-text">Joined 2023</span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="card-footer">
+            <div class="card-status">
+              <div class="status-indicator" [class.active]="emp.activeStatus">
+                {{ emp.activeStatus ? 'Active' : 'Inactive' }}
+              </div>
+            </div>
+            <div class="card-actions">
+              <button nbButton 
+                      ghost 
+                      size="tiny" 
+                      status="info"
+                      [routerLink]="['/pages/master/editemployee', emp.employeeId]">
+                <nb-icon icon="edit-2-outline"></nb-icon>
+              </button>
+              <button nbButton 
+                      ghost 
+                      size="tiny" 
+                      status="danger"
+                      (click)="delete(emp.employeeId)">
+                <nb-icon icon="trash-2-outline"></nb-icon>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Compact View for Mobile -->
+    <div class="compact-view-container" *ngIf="viewMode === 'compact' && !loading && filteredEmployees.length > 0">
+      <div class="compact-list">
+        <div class="compact-item" 
+             *ngFor="let emp of filteredEmployees; trackBy: trackByEmployeeId"
+             (click)="viewEmployeeDetails(emp)">
+          <div class="compact-avatar" [style.background]="getAvatarColor(emp)">
+            {{ emp.firstName.charAt(0) }}{{ emp.lastName.charAt(0) }}
+          </div>
+          <div class="compact-info">
+            <h4>{{ emp.firstName }} {{ emp.lastName }}</h4>
+            <p>{{ emp.emailId }}</p>
+          </div>
+          <div class="compact-status">
+            <div class="status-dot" [class.active]="emp.activeStatus"></div>
+            <span>{{ emp.employeeCode }}</span>
+          </div>
+          <nb-icon icon="chevron-right-outline" class="compact-arrow"></nb-icon>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pagination -->
+    <div class="pagination-container" *ngIf="filteredEmployees.length > 0 && !loading">
+      <div class="pagination">
+        <button nbButton 
+                ghost 
+                size="small"
+                [disabled]="currentPage === 1"
+                (click)="prevPage()">
+          <nb-icon icon="chevron-left-outline"></nb-icon>
+          Previous
+        </button>
+        
+        <div class="page-numbers">
+          <button *ngFor="let page of getPageNumbers()" 
+                  nbButton 
+                  ghost 
+                  size="small"
+                  [status]="page === currentPage ? 'primary' : 'basic'"
+                  (click)="goToPage(page)"
+                  class="page-btn">
+            {{ page }}
+          </button>
+        </div>
+        
+        <button nbButton 
+                ghost 
+                size="small"
+                [disabled]="currentPage === totalPages"
+                (click)="nextPage()">
+          Next
+          <nb-icon icon="chevron-right-outline"></nb-icon>
+        </button>
+      </div>
+    </div>
   </nb-card-body>
 </nb-card>
+
+<!-- Action Menu Popover -->
+<ng-template #actionMenu>
+  <div class="action-menu-popover">
+    <button nbButton 
+            ghost 
+            size="tiny" 
+            fullWidth
+            (click)="viewEmployeeDetails(selectedEmployee)">
+      <nb-icon icon="eye-outline"></nb-icon>
+      View Details
+    </button>
+    <button nbButton 
+            ghost 
+            size="tiny" 
+            fullWidth
+            (click)="sendEmail(selectedEmployee?.emailId)">
+      <nb-icon icon="email-outline"></nb-icon>
+      Send Email
+    </button>
+    <button nbButton 
+            ghost 
+            size="tiny" 
+            fullWidth
+            (click)="toggleEmployeeStatus(selectedEmployee)">
+      <nb-icon icon="toggle-right-outline"></nb-icon>
+      Toggle Status
+    </button>
+    <div class="menu-divider"></div>
+    <button nbButton 
+            ghost 
+            size="tiny" 
+            status="danger"
+            fullWidth
+            (click)="delete(selectedEmployee?.employeeId)">
+      <nb-icon icon="trash-2-outline"></nb-icon>
+      Delete
+    </button>
+  </div>
+</ng-template>

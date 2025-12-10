@@ -10,7 +10,7 @@
 
 export const environment = {
   production: false,
-  apiBaseUrl: 'https://localhost:7120/api',
+  apiBaseUrl: 'https://localhost:7119/api',
   apiProcessUrl: 'https://localhost:7224/api',
   apiReportUrl: 'https://localhost:7051/api',
 };

@@ -1,86 +1,59 @@
+// // jwt.interceptor.ts
+// import { Injectable } from '@angular/core';
+// import { HttpRequest, HttpHandler, HttpEvent, HttpInterceptor } from '@angular/common/http';
+// import { Observable } from 'rxjs';
+// import { AuthService } from './auth.service';
+
+// @Injectable()
+// export class JwtInterceptor implements HttpInterceptor {
+//   constructor(private authService: AuthService) {}
+
+//   intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
+//     // Add authorization header with jwt token if available
+//     const token = this.authService.getToken();
+//     if (token) {
+//       request = request.clone({
+//         setHeaders: {
+//           Authorization: `Bearer ${token}`
+//         }
+//       });
+//     }
+
+//     return next.handle(request);
+//   }
+// }
 import { Injectable } from '@angular/core';
-import {
-  HttpInterceptor,
-  HttpRequest,
-  HttpHandler,
-  HttpEvent,
-  HttpErrorResponse
-} from '@angular/common/http';
-import { Observable, throwError } from 'rxjs';
+import { HttpInterceptor, HttpRequest, HttpHandler, HttpEvent } from '@angular/common/http';
+import { Observable } from 'rxjs';
 import { NbTokenService, NbAuthJWTToken } from '@nebular/auth';
-import { switchMap, take, catchError } from 'rxjs/operators';
-import { NbToastrService } from '@nebular/theme';
-import { Router } from '@angular/router';
+import { switchMap, take } from 'rxjs/operators';
 
 @Injectable()
 export class MyJwtInterceptor implements HttpInterceptor {
 
-  constructor(
-    private tokenService: NbTokenService,
-    private toastrService: NbToastrService,
-    private router: Router
-  ) {}
+  constructor(private tokenService: NbTokenService) {}
 
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-    // Allow login & refresh endpoints to pass through without token
     if (req.url.endsWith('/auth/login') || req.url.endsWith('/refresh-token')) {
-      return next.handle(req).pipe(
-        catchError((error: HttpErrorResponse) => this.handleError(error))
+      return next.handle(req); } // Don't attach token for anonymous APIs
+    // Get the token from Nebular storage
+    return this.tokenService.get()
+      .pipe(
+        take(1), // take only the latest token value
+        switchMap((token: NbAuthJWTToken) => {
+          if (token && token.getValue()) {
+            // Clone the request and add the Authorization header
+            const clonedReq = req.clone({
+              setHeaders: {
+                Authorization: `Bearer ${token.getValue()}`
+              }
+            });
+            return next.handle(clonedReq);
+          } else {
+            // No token found, proceed without modifying the request
+            return next.handle(req);
+          }
+        })
       );
-    }
-
-    return this.tokenService.get().pipe(
-      take(1),
-      switchMap((token: NbAuthJWTToken) => {
-        let clonedReq = req;
-        if (token && token.getValue()) {
-          clonedReq = req.clone({
-            setHeaders: {
-              Authorization: `Bearer ${token.getValue()}`
-            }
-          });
-        }
-        return next.handle(clonedReq).pipe(
-          catchError((error: HttpErrorResponse) => this.handleError(error))
-        );
-      })
-    );
-  }
-
-  private handleError(error: HttpErrorResponse): Observable<never> {
-    let message = 'Something went wrong!';
-    if (error.error && typeof error.error === 'string') {
-      message = error.error;
-    } else if (error.error && error.error.message) {
-      message = error.error.message;
-    } else if (error.message) {
-      message = error.message;
-    }
-
-    // ✅ If token expired or invalid (401), redirect to login
-    if (error.status === 401) {
-      this.toastrService.warning('Session expired. Please log in again.', 'Unauthorized', {
-        duration: 4000,
-        icon: 'alert-triangle-outline',
-        status: 'warning',
-        destroyByClick: true,
-      });
-
-      // Clear token to avoid using invalid one
-      this.tokenService.clear().subscribe(() => {
-        this.router.navigate(['/auth/login']);  // 👈 redirect
-      });
-    } else {
-      // For other errors, show danger toast
-      this.toastrService.danger(message, 'Error', {
-        duration: 4000,
-        icon: 'alert-circle-outline',
-        status: 'danger',
-        destroyByClick: true,
-        preventDuplicates: true
-      });
-    }
-
-    return throwError(() => error);
   }
 }

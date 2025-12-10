@@ -16,25 +16,25 @@ export const MENU_ITEMS: NbMenuItem[] = [
     icon: 'layers-outline',
     children: [
       {
-        title: 'Students',
-        link: '/pages/master/students',
+        title: 'Payable Categories',
+        link: '/pages/master/payablecategories',
       },
       {
-        title: 'Rooms',
-        link: '/pages/master/rooms',
-     },
+        title: 'Organization Attribute Categories',
+        link: '/pages/master/OrgAttributes',
+      },
+      {
+        title: 'Pay Components',
+        link: '/pages/master/payablecomponent',
+      },
     //   {
-    //     title: 'Pay Components',
-    //     link: '/pages/master/payablecomponent',
-    //   },
-    // //   {
-    // //   title: 'Tax Components',
-    // //   link: '/pages/master/taxablecomponent',
-    // // },
-    //   {
-    //     title: 'Employee Master',
-    //     link: '/pages/master/employeemaster',
-    //   },
+    //   title: 'Tax Components',
+    //   link: '/pages/master/taxablecomponent',
+    // },
+      {
+        title: 'Employee Master',
+        link: '/pages/master/employeemaster',
+      },
       
       
     ],
@@ -50,77 +50,67 @@ export const MENU_ITEMS: NbMenuItem[] = [
       //   link: '/pages/layout/tabs',
       // },
       {
-        title: 'Bookings',
+        title: 'Pay Periods',
         pathMatch: 'prefix',
-        link: '/pages/transactions/bookings',
+        link: '/pages/transactions/payperiods',
       },
       {
-        title: 'Bills',
+        title: 'Attendance Entry',
         pathMatch: 'prefix',
-        link: '/pages/transactions/bills',
-       },
-      {
-        title: 'Payments',
-        pathMatch: 'prefix',
-        link: '/pages/transactions/payments',
+        link: '/pages/transactions/attendance',
       },
       {
-        title: 'Payment Register',
-        pathMatch: 'prefix',
-        link: '/pages/transactions/paymentregister',
-      },
-      {
-      title: 'Daybook view',
+      title: 'Salary Pay component',
       pathMatch: 'prefix',
-      link: '/pages/transactions/daybookview',
+      link: '/pages/transactions/salarypaycomponent',
     },
   
     ],
   },
+  {
+    title: 'Reports',
+    icon: 'file-text-outline',
+    children: [
+      {
+        title: 'Payslip View',
+        link: '/pages/reports/payslipview',
+      },
+      // {
+      //   title: 'Payslip Report',
+      //   link: '/pages/ui-features/icons',
+      // },
+      // {
+      //   title: 'PF Report',
+      //   link: '/pages/reports/pfreport',
+      // },
+      // {
+      //   title: 'Esi Rerport',
+      //   link: '/pages/reports/esireport',
+      // }
+      // ,
+      // {
+      //   title: 'PT Report',
+      //   link: '/pages/reports/ptreport',
+      //  },
+      {
+        title: 'Bank Transfer',
+        link: '/pages/reports/btreport',
+      },
+    ],
+  // },
   // {
-  //   title: 'Reports',
-  //   icon: 'file-text-outline',
+  //   title: 'Settings',
+  //   icon: 'settings-outline',
   //   children: [
   //     {
-  //       title: 'Payslip View',
-  //       link: '/pages/reports/payslipview',
+  //       title: 'Profile',
+  //       link: '/pages/modal-overlays/dialog',
   //     },
-  //     // {
-  //     //   title: 'Payslip Report',
-  //     //   link: '/pages/ui-features/icons',
-  //     // },
-  //     // {
-  //     //   title: 'PF Report',
-  //     //   link: '/pages/reports/pfreport',
-  //     // },
-  //     // {
-  //     //   title: 'Esi Rerport',
-  //     //   link: '/pages/reports/esireport',
-  //     // }
-  //     // ,
-  //     // {
-  //     //   title: 'PT Report',
-  //     //   link: '/pages/reports/ptreport',
-  //     //  },
-  //     // {
-  //     //   title: 'Bank Transfer',
-  //     //   link: '/pages/reports/btreport',
-  //     // },
-  //   ],
-  // // },
-  // // {
-  // //   title: 'Settings',
-  // //   icon: 'settings-outline',
-  // //   children: [
-  // //     {
-  // //       title: 'Profile',
-  // //       link: '/pages/modal-overlays/dialog',
-  // //     },
-  // //     {
+  //     {
       
-  // //       title: 'Preferences',
-  // //       link: '/pages/modal-overlays/window',
-  // //     },
-  // //   ],
-  // }
+  //       title: 'Preferences',
+  //       link: '/pages/modal-overlays/window',
+  //     },
+  //   ],
+  }
 ];

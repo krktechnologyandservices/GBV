@@ -2,8 +2,7 @@ import { RouterModule, Routes } from '@angular/router';
 import { NgModule } from '@angular/core';
 
 import { PagesComponent } from './pages.component';
-//import { DashboardComponent } from './dashboard/dashboard.component';
-import { DashboardComponent } from './layout/datshboard/datshboard.component';
+
 
 import { NotFoundComponent } from './miscellaneous/not-found/not-found.component';
 
@@ -11,14 +10,7 @@ const routes: Routes = [{
   path: '',
   component: PagesComponent,
   children: [
-    {
-      path: 'dashboard',
-      component: DashboardComponent,
-    },
-    {
-      path: 'iot-dashboard',
-      component: DashboardComponent,
-    },
+    
     {
       path: 'master',
       loadChildren: () => import('./layout/master.module')
@@ -36,7 +28,7 @@ const routes: Routes = [{
     },
     {
       path: '',
-      redirectTo: 'dashboard',
+      redirectTo: 'master',
       pathMatch: 'full',
     },
     {

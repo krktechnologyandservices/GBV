@@ -9,7 +9,8 @@ import { NbMenuModule,
   NbTabsetModule, NbUserModule,NbCheckboxModule,NbInputModule ,NbSelectModule,
   NbIconModule,
   NbFormFieldModule,NbLayoutModule,NbActionsModule ,
-  NbContextMenuModule
+  NbContextMenuModule,
+  NbSidebarModule 
 
 } from '@nebular/theme';
 
@@ -43,6 +44,7 @@ import { PayslipviewComponent } from './reports/payslipview/payslipview.componen
   NbCheckboxModule,
   NbInputModule ,
   NbSelectModule,
+  NbSidebarModule ,
   NbIconModule,NbLayoutModule,NbActionsModule ,NbContextMenuModule,
  
   
